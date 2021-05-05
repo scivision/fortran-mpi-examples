@@ -1,6 +1,6 @@
 # Fortran Coarray and MPI Examples
 
-[![cmake](https://github.com/scivision/fortran-mpi-examples/actions/workflows/cmake.yml/badge.svg)](https://github.com/scivision/fortran-mpi-examples/actions/workflows/cmake.yml)
+[![cmake](https://github.com/scivision/fortran-coarray-mpi-examples/actions/workflows/cmake.yml/badge.svg)](https://github.com/scivision/fortran-coarray-mpi-examples/actions/workflows/cmake.yml)
 
 A few very basic examples, perhaps use to test Coarray and MPI library functionality.
 GCC/Gfortran, Intel oneAPI, NAG, Cray, IBM XL and other compilers support Fortran 2008 Coarrays.
