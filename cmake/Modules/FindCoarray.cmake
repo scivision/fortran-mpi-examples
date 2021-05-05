@@ -72,9 +72,8 @@ elseif(CMAKE_Fortran_COMPILER_ID IN_LIST opencoarray_supported)
 
   if(NOT Coarray_LIBRARY)
     find_package(PkgConfig)
-    pkg_check_modules(pc_caf caf)
-    if(NOT pc_caf_FOUND)
-      pkg_check_modules(pc_caf caf-openmpi)
+    if(PKG_CONFIG_FOUND)
+      pkg_search_module(pc_caf caf caf-openmpi caf-mpich)
     endif()
 
     find_library(Coarray_LIBRARY
