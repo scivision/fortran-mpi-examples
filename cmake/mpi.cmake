@@ -24,7 +24,7 @@ endif()
 # MPI_VERSION isn't always defined. Better test the required API level.
 check_fortran_source_compiles("
 program test
-use mpi_f08, only : mpi_init, mpi_finalize
+use mpi_f08, only : mpi_init, mpi_finalize, mpi_comm_world
 implicit none
 call mpi_init()
 call mpi_finalize()
