@@ -22,7 +22,7 @@ jobs:
     - name: install presets
       run: |
         sudo apt -yq update
-        sudo apt -yq install --no-install-recommends libopenmpi-dev libcoarrays-dev
+        sudo apt -yq install --no-install-recommends libopenmpi-dev libcoarrays-dev libcoarrays-openmpi-dev
 
     - run: cmake --preset make
     - run: cmake --build build --parallel
