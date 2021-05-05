@@ -20,3 +20,5 @@ endif
 mpiexec = find_program('mpiexec', required : false, disabler: true)  # MS-MPI has only mpiexec
 
 subdir('mpi')
+
+subdir('coarray')

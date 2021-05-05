@@ -1,6 +1,10 @@
-# MPI Examples
+# Fortran Coarray and MPI Examples
 
-A few very basic examples, perhaps use to test MPI library functionality.
+[![cmake](https://github.com/scivision/fortran-mpi-examples/actions/workflows/cmake.yml/badge.svg)](https://github.com/scivision/fortran-mpi-examples/actions/workflows/cmake.yml)
+
+A few very basic examples, perhaps use to test Coarray and MPI library functionality.
+GCC/Gfortran, Intel oneAPI, NAG, Cray, IBM XL and other compilers support Fortran 2008 Coarrays.
+
 Free, popular MPI 3.0 interfaces for C and Fortran include:
 
 * [OpenMPI](https://www.open-mpi.org/) (Linux, Mac)
