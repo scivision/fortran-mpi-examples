@@ -1,0 +1,29 @@
+name: cmake
+
+on:
+  push:
+    paths:
+      - "**.f90"
+      - "**.F90"
+      - "**.cmake"
+      - "**/CMakeLists.txt"
+      - ".github/workflows/cmake.yml"
+
+
+jobs:
+
+  linux:
+    runs-on: ubuntu-latest
+    env:
+      CTEST_PARALLEL_LEVEL: 2
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: install presets
+      run: |
+        sudo apt -yq update
+        sudo apt -yq install --no-install-recommends libopenmpi-dev libcoarrays-dev
+
+    - run: cmake --preset make
+    - run: cmake --build build --parallel
+    - run: ctest --preset default
