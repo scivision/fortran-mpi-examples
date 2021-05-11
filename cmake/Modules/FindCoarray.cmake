@@ -43,9 +43,7 @@ The following cache variables may also be set:
 set(options_coarray Intel NAG)  # flags needed
 set(opencoarray_supported GNU)
 
-unset(Coarray_COMPILE_OPTIONS)
-unset(Coarray_LIBRARY)
-unset(Coarray_REQUIRED_VARS)
+set(Coarray_LIBRARY)
 
 if(CMAKE_Fortran_COMPILER_ID IN_LIST options_coarray)
 
@@ -65,20 +63,36 @@ if(CMAKE_Fortran_COMPILER_ID IN_LIST options_coarray)
 
 elseif(CMAKE_Fortran_COMPILER_ID IN_LIST opencoarray_supported)
 
-  find_package(OpenCoarrays QUIET)
-  if(OpenCoarrays_FOUND)
-    set(Coarray_LIBRARY OpenCoarrays::caf_mpi)
-  endif()
+  add_library(Coarray::Coarray INTERFACE IMPORTED)
 
-  if(NOT Coarray_LIBRARY)
+  find_package(OpenCoarrays)
+  if(OpenCoarrays_FOUND)
+    target_link_libraries(Coarray::Coarray INTERFACE OpenCoarrays::opencoarrays_mod OpenCoarrays::caf_mpi_static)
+    get_target_property(_l OpenCoarrays::caf_mpi_static LOCATION)
+    set(Coarray_LIBRARY ${_l})
+    get_target_property(_l OpenCoarrays::opencoarrays_mod LOCATION)
+    list(APPEND Coarray_LIBRARY ${_l})
+    get_target_property(_l OpenCoarrays::opencoarrays_mod INTERFACE_INCLUDE_DIRECTORIES)
+    set(Coarray_INCLUDE_DIR ${_l})
+  else()
     find_package(PkgConfig)
     if(PKG_CONFIG_FOUND)
       pkg_search_module(pc_caf caf caf-openmpi caf-mpich)
     endif()
 
     find_library(Coarray_LIBRARY
-      NAMES ${pc_caf_LIBRARIES}
+      NAMES ${pc_caf_LIBRARIES} opencoarrays_mod
       HINTS ${pc_caf_LIBRARY_DIRS})
+
+    foreach(l caf_mpi caf_openmpi)
+      find_library(Coarray_${l}_LIBRARY
+        NAMES ${l}
+        HINTS ${pc_caf_LIBRARY_DIRS})
+
+      if(Coarray_${l}_LIBRARY)
+        list(APPEND Coarray_LIBRARY ${Coarray_${l}_LIBRARY})
+      endif()
+    endforeach()
 
     find_path(Coarray_INCLUDE_DIR
       NAMES opencoarrays.mod
@@ -88,8 +102,13 @@ elseif(CMAKE_Fortran_COMPILER_ID IN_LIST opencoarray_supported)
       set(Coarray_COMPILE_OPTIONS -fcoarray=lib)
     endif()
 
-    set(Coarray_REQUIRED_VARS ${Coarray_LIBRARY})
-  endif(NOT Coarray_LIBRARY)
+    target_include_directories(Coarray::Coarray INTERFACE ${Coarray_INCLUDE_DIR})
+    target_link_libraries(Coarray::Coarray INTERFACE ${Coarray_LIBRARY})
+    set_target_properties(Coarray::Coarray PROPERTIES
+      INTERFACE_COMPILE_OPTIONS ${Coarray_COMPILE_OPTIONS})
+  endif()
+
+  set(Coarray_REQUIRED_VARS ${Coarray_LIBRARY})
 
 endif()
 
@@ -101,21 +120,11 @@ if(Coarray_FOUND)
   set(Coarray_LIBRARIES ${Coarray_LIBRARY})
   set(Coarray_INCLUDE_DIRS ${Coarray_INCLUDE_DIR})
 
-  if(NOT DEFINED Coarray::Coarray)
+  if(NOT TARGET Coarray::Coarray)
+    # flags only
+    add_library(Coarray::Coarray INTERFACE IMPORTED)
 
-    if(Coarray_LIBRARY)
-      add_library(Coarray::Coarray IMPORTED UNKNOWN)
-      set_target_properties(Coarray::Coarray PROPERTIES IMPORTED_LOCATION ${Coarray_LIBRARY})
-    else()  # flags only
-      add_library(Coarray::Coarray INTERFACE IMPORTED)
-    endif()
-
-    if(Coarray_INCLUDE_DIR)
-      set_target_properties(Coarray::Coarray PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${Coarray_INCLUDE_DIR})
-    endif()
-    if(Coarray_COMPILE_OPTIONS)
-      set_target_properties(Coarray::Coarray PROPERTIES INTERFACE_COMPILE_OPTIONS ${Coarray_COMPILE_OPTIONS})
-    endif()
+    set_target_properties(Coarray::Coarray PROPERTIES INTERFACE_COMPILE_OPTIONS ${Coarray_COMPILE_OPTIONS})
   endif()
 endif()
 
