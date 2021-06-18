@@ -15,8 +15,13 @@ Components
 MPI code languages are specified by components:
 
 ``C``
+  C interface for MPI (virtually all MPI libraries will have this)
+
+``CXX``
+  C++ interface for MPI (not all MPI libraries have C++ interface)
 
 ``Fortran``
+  Fortran interface for interface for MPI (some MPI libraries don't build this by default)
 
 
 Result Variables
@@ -34,6 +39,7 @@ Result Variables
 #]=======================================================================]
 include(CheckFortranSourceCompiles)
 include(CheckCSourceCompiles)
+include(CheckCXXSourceCompiles)
 
 set(CMAKE_REQUIRED_FLAGS)
 set(_hints)
@@ -51,7 +57,7 @@ function(find_c)
 set(MPI_C_LIBRARY)
 
 if(WIN32)
-  if(CMAKE_Fortran_COMPILER_ID MATCHES Intel)
+  if(CMAKE_C_COMPILER_ID MATCHES Intel)
     set(names impi)
   else()
     set(names msmpi)
@@ -129,6 +135,97 @@ set(MPI_C_LIBRARY ${MPI_C_LIBRARY} PARENT_SCOPE)
 set(MPI_C_FOUND true PARENT_SCOPE)
 
 endfunction(find_c)
+
+
+function(find_cxx)
+
+# mpich: mpi pmpi
+# openmpi: mpi
+# MS-MPI: msmpi
+# Intel Windows: impi
+# Intel MPI: mpi
+
+set(MPI_CXX_LIBRARY)
+
+if(WIN32)
+  if(CMAKE_CXX_COMPILER_ID MATCHES Intel)
+    set(names impi)
+  else()
+    set(names msmpi)
+  endif()
+elseif(DEFINED ENV{I_MPI_ROOT})
+  set(names mpi)
+else()
+  set(names mpi pmpi)
+endif()
+
+pkg_search_module(pc_mpi_cxx ompi-cxx)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES Intel)
+  set(wrap_name mpiicpc mpiicpc.bat)
+else()
+  set(wrap_name mpicxx)
+endif()
+
+find_program(cxx_wrap
+  NAMES ${wrap_name}
+  HINTS ${_hints}
+  PATH_SUFFIXES bin sbin
+  NAMES_PER_DIR)
+if(cxx_wrap)
+  get_filename_component(_wrap_hint ${cxx_wrap} DIRECTORY)
+  get_filename_component(_wrap_hint ${_wrap_hint} DIRECTORY)
+endif()
+
+foreach(n ${names})
+
+  find_library(MPI_CXX_${n}_LIBRARY
+    NAMES ${n}
+    HINTS ${_wrap_hint} ${pc_mpi_cxx_LIBRARY_DIRS} ${pc_mpi_cxx_LIBDIR} ${_hints}
+    PATH_SUFFIXES lib lib/release
+  )
+  if(MPI_CXX_${n}_LIBRARY)
+    list(APPEND MPI_CXX_LIBRARY ${MPI_CXX_${n}_LIBRARY})
+  endif()
+
+endforeach()
+if(NOT MPI_CXX_LIBRARY)
+  return()
+endif()
+
+find_path(MPI_CXX_INCLUDE_DIR
+  NAMES mpi.h
+  HINTS ${_wrap_hint} ${pc_mpi_cxx_INCLUDE_DIRS} ${_hints} ${_hints_inc}
+  PATH_SUFFIXES include
+)
+if(NOT MPI_CXX_INCLUDE_DIR)
+  return()
+endif()
+
+set(CMAKE_REQUIRED_INCLUDES ${MPI_CXX_INCLUDE_DIR})
+set(CMAKE_REQUIRED_LIBRARIES ${MPI_CXX_LIBRARY})
+if(Threads_FOUND)
+  list(APPEND CMAKE_REQUIRED_LIBRARIES Threads::Threads)
+endif()
+check_cxx_source_compiles("
+#include <mpi.h>
+#ifndef NULL
+#define NULL 0
+#endif
+int main(void) {
+    MPI_Init(NULL, NULL);
+    MPI_Finalize();
+    return 0;}
+" MPI_CXX_links)
+if(NOT MPI_CXX_links)
+  return()
+endif()
+
+set(MPI_CXX_INCLUDE_DIR ${MPI_CXX_INCLUDE_DIR} PARENT_SCOPE)
+set(MPI_CXX_LIBRARY ${MPI_CXX_LIBRARY} PARENT_SCOPE)
+set(MPI_CXX_FOUND true PARENT_SCOPE)
+
+endfunction(find_cxx)
 
 
 function(find_fortran)
@@ -261,6 +358,10 @@ find_program(_exec
 
 if(C IN_LIST MPI_FIND_COMPONENTS)
   find_c()
+endif()
+
+if(CXX IN_LIST MPI_FIND_COMPONENTS)
+  find_cxx()
 endif()
 
 if(Fortran IN_LIST MPI_FIND_COMPONENTS)
