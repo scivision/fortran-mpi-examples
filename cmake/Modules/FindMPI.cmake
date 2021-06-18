@@ -64,8 +64,14 @@ endif()
 
 pkg_search_module(pc_mpi_c ompi-c)
 
+if(CMAKE_C_COMPILER_ID MATCHES Intel)
+  set(wrap_name mpiicc mpiicc.bat)
+else()
+  set(wrap_name mpicc)
+endif()
+
 find_program(c_wrap
-  NAMES mpiicc mpicc
+  NAMES ${wrap_name}
   HINTS ${_hints}
   PATH_SUFFIXES bin sbin
   NAMES_PER_DIR)
@@ -152,8 +158,14 @@ endif()
 
 pkg_search_module(pc_mpi_f ompi-fort)
 
+if(CMAKE_Fortran_COMPILER_ID MATCHES Intel)
+  set(wrap_name mpiifort mpiifort.bat)
+else()
+  set(wrap_name mpifort mpifc)
+endif()
+
 find_program(f_wrap
-  NAMES mpiifort mpifort mpifc
+  NAMES ${wrap_name}
   HINTS ${_hints}
   PATH_SUFFIXES bin sbin
   NAMES_PER_DIR)
@@ -188,7 +200,7 @@ if(NOT MPI_Fortran_INCLUDE_DIR)
   return()
 endif()
 
-if(WIN32)
+if(WIN32 AND NOT CMAKE_Fortran_COMPILER_ID MATCHES Intel)
   find_path(MPI_Fortran_INCLUDE_EXTRA
     NAMES mpifptr.h
     HINTS ${_wrap_hint} ${pc_mpi_f_INCLUDE_DIRS} ${_hints} ${_hints_inc}
@@ -234,7 +246,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL Linux OR CMAKE_C_COMPILER_ID MATCHES Intel)
   list(APPEND _hints $ENV{I_MPI_ROOT})
 endif()
 
-if(WIN32)
+if(WIN32 AND NOT CMAKE_C_COMPILER_ID MATCHES Intel)
   list(APPEND _hints $ENV{MSMPI_LIB64})
   list(APPEND _hints_inc $ENV{MSMPI_INC})
 endif()
