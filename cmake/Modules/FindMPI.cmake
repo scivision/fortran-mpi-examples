@@ -140,7 +140,7 @@ endfunction(find_c)
 function(find_cxx)
 
 # mpich: mpi pmpi
-# openmpi: mpi
+# openmpi: mpi_cxx mpi
 # MS-MPI: msmpi
 # Intel Windows: impi
 # Intel MPI: mpi
@@ -156,7 +156,9 @@ if(WIN32)
 elseif(DEFINED ENV{I_MPI_ROOT})
   set(names mpi)
 else()
-  set(names mpi pmpi)
+  set(names
+    mpi_cxx mpi
+    mpichcxx mpi pmpi)
 endif()
 
 pkg_search_module(pc_mpi_cxx ompi-cxx)
@@ -249,7 +251,7 @@ elseif(DEFINED ENV{I_MPI_ROOT})
 else()
   set(names
     mpi_usempif08 mpi_usempi_ignore_tkr mpi_mpifh mpi
-    mpifort mpi pmpi
+    mpifort mpichfort mpi pmpi
     )
 endif()
 
