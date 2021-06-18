@@ -50,10 +50,12 @@ function(find_c)
 
 set(MPI_C_LIBRARY)
 
-if(MSVC)
-  set(names impi)
-elseif(WIN32)
-  set(names msmpi)
+if(WIN32)
+  if(CMAKE_Fortran_COMPILER_ID MATCHES Intel)
+    set(names impi)
+  else()
+    set(names msmpi)
+  endif()
 elseif(DEFINED ENV{I_MPI_ROOT})
   set(names mpi)
 else()
@@ -77,7 +79,7 @@ foreach(n ${names})
   find_library(MPI_C_${n}_LIBRARY
     NAMES ${n}
     HINTS ${_wrap_hint} ${pc_mpi_c_LIBRARY_DIRS} ${pc_mpi_c_LIBDIR} ${_hints}
-    PATH_SUFFIXES lib
+    PATH_SUFFIXES lib lib/release
   )
   if(MPI_C_${n}_LIBRARY)
     list(APPEND MPI_C_LIBRARY ${MPI_C_${n}_LIBRARY})
@@ -133,10 +135,12 @@ function(find_fortran)
 
 set(MPI_Fortran_LIBRARY)
 
-if(MSVC)
-  set(names impi)
-elseif(WIN32)
-  set(names msmpi)
+if(WIN32)
+  if(CMAKE_Fortran_COMPILER_ID MATCHES Intel)
+    set(names impi)
+  else()
+    set(names msmpi)
+  endif()
 elseif(DEFINED ENV{I_MPI_ROOT})
   set(names mpifort mpi)
 else()
@@ -163,7 +167,7 @@ foreach(n ${names})
   find_library(MPI_Fortran_${n}_LIBRARY
     NAMES ${n}
     HINTS ${_wrap_hint} ${pc_mpi_f_LIBRARY_DIRS} ${pc_mpi_f_LIBDIR} ${_hints}
-    PATH_SUFFIXES lib
+    PATH_SUFFIXES lib lib/release
   )
   if(MPI_Fortran_${n}_LIBRARY)
     list(APPEND MPI_Fortran_LIBRARY ${MPI_Fortran_${n}_LIBRARY})
@@ -183,14 +187,16 @@ if(NOT MPI_Fortran_INCLUDE_DIR)
   return()
 endif()
 
-find_path(MPI_Fortran_INCLUDE_EXTRA
-  NAMES mpifptr.h
-  HINTS ${_wrap_hint} ${pc_mpi_f_INCLUDE_DIRS} ${_hints} ${_hints_inc}
-  PATH_SUFFIXES include include/x64
-)
+if(WIN32)
+  find_path(MPI_Fortran_INCLUDE_EXTRA
+    NAMES mpifptr.h
+    HINTS ${_wrap_hint} ${pc_mpi_f_INCLUDE_DIRS} ${_hints} ${_hints_inc}
+    PATH_SUFFIXES include include/x64
+  )
 
-if(MPI_Fortran_INCLUDE_EXTRA AND NOT MPI_Fortran_INCLUDE_EXTRA STREQUAL ${MPI_Fortran_INCLUDE_DIR})
-  list(APPEND MPI_Fortran_INCLUDE_DIR ${MPI_Fortran_INCLUDE_EXTRA})
+  if(MPI_Fortran_INCLUDE_EXTRA AND NOT MPI_Fortran_INCLUDE_EXTRA STREQUAL ${MPI_Fortran_INCLUDE_DIR})
+    list(APPEND MPI_Fortran_INCLUDE_DIR ${MPI_Fortran_INCLUDE_EXTRA})
+  endif()
 endif()
 
 set(CMAKE_REQUIRED_INCLUDES ${MPI_Fortran_INCLUDE_DIR})
@@ -257,9 +263,9 @@ if(MPI_C_FOUND)
   set(MPI_C_LIBRARIES ${MPI_C_LIBRARY})
   set(MPI_C_INCLUDE_DIRS ${MPI_C_INCLUDE_DIR})
   if(NOT TARGET MPI::MPI_C)
-    add_library(MPI::MPI_C IMPORTED UNKNOWN)
+    add_library(MPI::MPI_C IMPORTED INTERFACE)
     set_target_properties(MPI::MPI_C PROPERTIES
-      IMPORTED_LOCATION "${MPI_C_LIBRARIES}"
+      INTERFACE_LINK_LIBRARIES "${MPI_C_LIBRARIES}"
       INTERFACE_INCLUDE_DIRECTORIES "${MPI_C_INCLUDE_DIRS}"
     )
   endif()
@@ -269,9 +275,9 @@ if(MPI_Fortran_FOUND)
   set(MPI_Fortran_LIBRARIES ${MPI_Fortran_LIBRARY})
   set(MPI_Fortran_INCLUDE_DIRS ${MPI_Fortran_INCLUDE_DIR})
   if(NOT TARGET MPI::MPI_Fortran)
-    add_library(MPI::MPI_Fortran IMPORTED UNKNOWN)
+    add_library(MPI::MPI_Fortran IMPORTED INTERFACE)
     set_target_properties(MPI::MPI_Fortran PROPERTIES
-      IMPORTED_LOCATION "${MPI_Fortran_LIBRARIES}"
+      INTERFACE_LINK_LIBRARIES "${MPI_Fortran_LIBRARIES}"
       INTERFACE_INCLUDE_DIRECTORIES "${MPI_Fortran_INCLUDE_DIRS}"
     )
   endif()
@@ -282,3 +288,5 @@ if(MPI_FOUND)
   set(MPI_LIBRARIES ${MPI_Fortran_LIBRARIES} ${MPI_C_LIBRARIES})
   set(MPI_INCLUDE_DIRS ${MPI_Fortran_INCLUDE_DIRS} ${MPI_C_INCLUDE_DIRS})
 endif()
+
+mark_as_advanced(MPI_Fortran_LIBRARY MPI_Fortran_INCLUDE_DIR MPI_C_LIBRARY MPI_C_INCLUDE_DIR)

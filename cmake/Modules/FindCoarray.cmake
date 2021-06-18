@@ -121,10 +121,11 @@ if(Coarray_FOUND)
   set(Coarray_INCLUDE_DIRS ${Coarray_INCLUDE_DIR})
 
   if(NOT TARGET Coarray::Coarray)
-    # flags only
     add_library(Coarray::Coarray INTERFACE IMPORTED)
-
     set_target_properties(Coarray::Coarray PROPERTIES INTERFACE_COMPILE_OPTIONS ${Coarray_COMPILE_OPTIONS})
+    if(Coarray_LIBRARY)
+      target_link_libraries(Coarray::Coarray INTERFACE ${Coarray_LIBRARY})
+    endif()
   endif()
 endif()
 
