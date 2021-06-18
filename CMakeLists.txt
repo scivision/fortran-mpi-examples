@@ -8,7 +8,7 @@ LANGUAGES C Fortran
 DESCRIPTION "Example of using modern Fortran syntax"
 VERSION ${PROJECT_VERSION})
 
-include(CTest)
+enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 

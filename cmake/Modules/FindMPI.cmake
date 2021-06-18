@@ -60,6 +60,8 @@ else()
   set(names mpi pmpi)
 endif()
 
+pkg_search_module(pc_mpi_c ompi-c)
+
 find_program(c_wrap
   NAMES mpiicc mpicc
   HINTS ${_hints}
@@ -74,7 +76,7 @@ foreach(n ${names})
 
   find_library(MPI_C_${n}_LIBRARY
     NAMES ${n}
-    HINTS ${_wrap_hint} ${_hints}
+    HINTS ${_wrap_hint} ${pc_mpi_c_LIBRARY_DIRS} ${pc_mpi_c_LIBDIR} ${_hints}
     PATH_SUFFIXES lib
   )
   if(MPI_C_${n}_LIBRARY)
@@ -88,7 +90,7 @@ endif()
 
 find_path(MPI_C_INCLUDE_DIR
   NAMES mpi.h
-  HINTS ${_wrap_hint} ${_hints} ${_hints_inc}
+  HINTS ${_wrap_hint} ${pc_mpi_c_INCLUDE_DIRS} ${_hints} ${_hints_inc}
   PATH_SUFFIXES include
 )
 if(NOT MPI_C_INCLUDE_DIR)
@@ -144,6 +146,7 @@ else()
     )
 endif()
 
+pkg_search_module(pc_mpi_f ompi-fort)
 
 find_program(f_wrap
   NAMES mpiifort mpifort mpifc
@@ -159,7 +162,7 @@ foreach(n ${names})
 
   find_library(MPI_Fortran_${n}_LIBRARY
     NAMES ${n}
-    HINTS ${_wrap_hint} ${_hints}
+    HINTS ${_wrap_hint} ${pc_mpi_f_LIBRARY_DIRS} ${pc_mpi_f_LIBDIR} ${_hints}
     PATH_SUFFIXES lib
   )
   if(MPI_Fortran_${n}_LIBRARY)
@@ -173,7 +176,7 @@ endif()
 
 find_path(MPI_Fortran_INCLUDE_DIR
   NAMES mpi.mod
-  HINTS ${_wrap_hint} ${_hints} ${_hints_inc}
+  HINTS ${_wrap_hint} ${pc_mpi_f_INCLUDE_DIRS} ${_hints} ${_hints_inc}
   PATH_SUFFIXES include
 )
 if(NOT MPI_Fortran_INCLUDE_DIR)
@@ -182,7 +185,7 @@ endif()
 
 find_path(MPI_Fortran_INCLUDE_EXTRA
   NAMES mpifptr.h
-  HINTS ${_wrap_hint} ${_hints} ${_hints_inc}
+  HINTS ${_wrap_hint} ${pc_mpi_f_INCLUDE_DIRS} ${_hints} ${_hints_inc}
   PATH_SUFFIXES include include/x64
 )
 
@@ -216,6 +219,7 @@ endfunction(find_fortran)
 
 #===== main program ======
 
+find_package(PkgConfig)
 find_package(Threads)
 
 # Intel MPI, which works with non-Intel compilers on Linux
