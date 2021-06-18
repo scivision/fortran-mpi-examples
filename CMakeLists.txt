@@ -12,8 +12,7 @@ include(CTest)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
-
-include(cmake/mpi.cmake)
+find_package(MPI REQUIRED COMPONENTS C Fortran)
 
 add_subdirectory(mpi)
 add_subdirectory(coarray)
