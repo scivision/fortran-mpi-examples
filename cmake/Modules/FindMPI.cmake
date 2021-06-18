@@ -181,7 +181,8 @@ endif()
 find_path(MPI_Fortran_INCLUDE_DIR
   NAMES mpi.mod
   HINTS ${_wrap_hint} ${pc_mpi_f_INCLUDE_DIRS} ${_hints} ${_hints_inc}
-  PATH_SUFFIXES include
+  PATH_SUFFIXES include lib
+  # yes, openmpi puts .mod files into lib/
 )
 if(NOT MPI_Fortran_INCLUDE_DIR)
   return()
