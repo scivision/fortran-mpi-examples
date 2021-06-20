@@ -46,6 +46,52 @@ set(_hints)
 set(_hints_inc)
 
 
+function(get_flags exec outvar)
+
+execute_process(COMMAND ${exec} -show
+OUTPUT_STRIP_TRAILING_WHITESPACE
+OUTPUT_VARIABLE ret
+RESULT_VARIABLE code
+TIMEOUT 10
+)
+if(NOT code EQUAL 0)
+  return()
+endif()
+
+set(${outvar} ${ret} PARENT_SCOPE)
+
+endfunction(get_flags)
+
+
+function(pop_flag raw flag outvar)
+
+set(_v)
+string(REGEX MATCHALL "(^| )${flag} *([^\" ]+|\"[^\"]+\")" _vars "${raw}")
+foreach(_p IN LISTS _vars)
+  string(REGEX REPLACE "(^| )${flag} *" "" _p "${_p}")
+  list(APPEND _v "${_p}")
+endforeach()
+
+set(${outvar} ${_v} PARENT_SCOPE)
+
+endfunction(pop_flag)
+
+
+function(pop_path raw outvar)
+
+set(flag /)
+set(_v)
+string(REGEX MATCHALL "(^| )${flag} *([^\" ]+|\"[^\"]+\")" _vars "${raw}")
+foreach(_p IN LISTS _vars)
+  string(REGEX REPLACE "(^| )${flag} *" "" _p "${_p}")
+  list(APPEND _v "/${_p}")
+endforeach()
+
+set(${outvar} ${_v} PARENT_SCOPE)
+
+endfunction(pop_path)
+
+
 function(find_c)
 
 # mpich: mpi pmpi
@@ -84,13 +130,27 @@ find_program(c_wrap
 if(c_wrap)
   get_filename_component(_wrap_hint ${c_wrap} DIRECTORY)
   get_filename_component(_wrap_hint ${_wrap_hint} DIRECTORY)
-endif()
+
+  get_flags(${c_wrap} c_raw)
+  if(c_raw)
+    pop_flag(${c_raw} -I inc_dirs)
+    pop_flag(${c_raw} ${CMAKE_LIBRARY_PATH_FLAG} lib_dirs)
+
+    pop_flag(${c_raw} -l lib_names)
+    if(lib_names)
+      set(names ${lib_names})
+    endif()
+
+    pop_path(${c_raw} lib_paths)
+    set(MPI_C_LIBRARY ${lib_paths})
+  endif(c_raw)
+endif(c_wrap)
 
 foreach(n ${names})
 
   find_library(MPI_C_${n}_LIBRARY
     NAMES ${n}
-    HINTS ${_wrap_hint} ${pc_mpi_c_LIBRARY_DIRS} ${pc_mpi_c_LIBDIR} ${_hints}
+    HINTS ${lib_dirs} ${_wrap_hint} ${pc_mpi_c_LIBRARY_DIRS} ${pc_mpi_c_LIBDIR} ${_hints}
     PATH_SUFFIXES lib lib/release
   )
   if(MPI_C_${n}_LIBRARY)
@@ -104,7 +164,7 @@ endif()
 
 find_path(MPI_C_INCLUDE_DIR
   NAMES mpi.h
-  HINTS ${_wrap_hint} ${pc_mpi_c_INCLUDE_DIRS} ${_hints} ${_hints_inc}
+  HINTS ${inc_dirs} ${_wrap_hint} ${pc_mpi_c_INCLUDE_DIRS} ${_hints} ${_hints_inc}
   PATH_SUFFIXES include
 )
 if(NOT MPI_C_INCLUDE_DIR)
@@ -177,13 +237,27 @@ find_program(cxx_wrap
 if(cxx_wrap)
   get_filename_component(_wrap_hint ${cxx_wrap} DIRECTORY)
   get_filename_component(_wrap_hint ${_wrap_hint} DIRECTORY)
-endif()
+
+  get_flags(${cxx_wrap} cxx_raw)
+  if(cxx_raw)
+    pop_flag(${cxx_raw} -I inc_dirs)
+    pop_flag(${cxx_raw} ${CMAKE_LIBRARY_PATH_FLAG} lib_dirs)
+
+    pop_flag(${cxx_raw} -l lib_names)
+    if(lib_names)
+      set(names ${lib_names})
+    endif()
+
+    pop_path(${cxx_raw} lib_paths)
+    set(MPI_CXX_LIBRARY ${lib_paths})
+  endif(cxx_raw)
+endif(cxx_wrap)
 
 foreach(n ${names})
 
   find_library(MPI_CXX_${n}_LIBRARY
     NAMES ${n}
-    HINTS ${_wrap_hint} ${pc_mpi_cxx_LIBRARY_DIRS} ${pc_mpi_cxx_LIBDIR} ${_hints}
+    HINTS ${lib_dirs} ${_wrap_hint} ${pc_mpi_cxx_LIBRARY_DIRS} ${pc_mpi_cxx_LIBDIR} ${_hints}
     PATH_SUFFIXES lib lib/release
   )
   if(MPI_CXX_${n}_LIBRARY)
@@ -197,7 +271,7 @@ endif()
 
 find_path(MPI_CXX_INCLUDE_DIR
   NAMES mpi.h
-  HINTS ${_wrap_hint} ${pc_mpi_cxx_INCLUDE_DIRS} ${_hints} ${_hints_inc}
+  HINTS ${inc_dirs} ${_wrap_hint} ${pc_mpi_cxx_INCLUDE_DIRS} ${_hints} ${_hints_inc}
   PATH_SUFFIXES include
 )
 if(NOT MPI_CXX_INCLUDE_DIR)
@@ -271,13 +345,27 @@ find_program(f_wrap
 if(f_wrap)
   get_filename_component(_wrap_hint ${f_wrap} DIRECTORY)
   get_filename_component(_wrap_hint ${_wrap_hint} DIRECTORY)
-endif()
+
+  get_flags(${f_wrap} f_raw)
+  if(f_raw)
+    pop_flag(${f_raw} -I inc_dirs)
+    pop_flag(${f_raw} ${CMAKE_LIBRARY_PATH_FLAG} lib_dirs)
+
+    pop_flag(${f_raw} -l lib_names)
+    if(lib_names)
+      set(names ${lib_names})
+    endif()
+
+    pop_path(${f_raw} lib_paths)
+    set(MPI_Fortran_LIBRARY ${lib_paths})
+  endif(f_raw)
+endif(f_wrap)
 
 foreach(n ${names})
 
   find_library(MPI_Fortran_${n}_LIBRARY
     NAMES ${n}
-    HINTS ${_wrap_hint} ${pc_mpi_f_LIBRARY_DIRS} ${pc_mpi_f_LIBDIR} ${_hints}
+    HINTS ${lib_dirs} ${_wrap_hint} ${pc_mpi_f_LIBRARY_DIRS} ${pc_mpi_f_LIBDIR} ${_hints}
     PATH_SUFFIXES lib lib/release
   )
   if(MPI_Fortran_${n}_LIBRARY)
@@ -291,7 +379,7 @@ endif()
 
 find_path(MPI_Fortran_INCLUDE_DIR
   NAMES mpi.mod
-  HINTS ${_wrap_hint} ${pc_mpi_f_INCLUDE_DIRS} ${_hints} ${_hints_inc}
+  HINTS ${inc_dirs} ${_wrap_hint} ${pc_mpi_f_INCLUDE_DIRS} ${_hints} ${_hints_inc}
   PATH_SUFFIXES include lib
   # yes, openmpi puts .mod files into lib/
 )
@@ -302,7 +390,7 @@ endif()
 if(WIN32 AND NOT CMAKE_Fortran_COMPILER_ID MATCHES Intel)
   find_path(MPI_Fortran_INCLUDE_EXTRA
     NAMES mpifptr.h
-    HINTS ${_wrap_hint} ${pc_mpi_f_INCLUDE_DIRS} ${_hints} ${_hints_inc}
+    HINTS ${inc_dirs} ${_wrap_hint} ${pc_mpi_f_INCLUDE_DIRS} ${_hints} ${_hints_inc}
     PATH_SUFFIXES include include/x64
   )
 
@@ -421,4 +509,5 @@ if(MPI_FOUND)
   set(MPIEXEC_MAX_NUMPROCS "${_n}" CACHE STRING "Maximum number of processors available to run MPI applications.")
 endif()
 
-mark_as_advanced(MPI_Fortran_LIBRARY MPI_Fortran_INCLUDE_DIR MPI_C_LIBRARY MPI_C_INCLUDE_DIR)
+mark_as_advanced(MPI_Fortran_LIBRARY MPI_Fortran_INCLUDE_DIR MPI_C_LIBRARY MPI_C_INCLUDE_DIR
+MPIEXEC_EXECUTABLE MPIEXEC_NUMPROC_FLAG MPIEXEC_MAX_NUMPROCS)
