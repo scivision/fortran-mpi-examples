@@ -351,7 +351,7 @@ if(WIN32 AND NOT CMAKE_C_COMPILER_ID MATCHES Intel)
 endif()
 
 # must have MPIexec to be worthwhile (MS-MPI doesn't have mpirun, but all have mpiexec)
-find_program(_exec
+find_program(MPIEXEC_EXECUTABLE
   NAMES mpiexec
   HINTS ${_hints} $ENV{MSMPI_BIN}
   PATH_SUFFIXES bin sbin
@@ -372,7 +372,7 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(MPI
-  REQUIRED_VARS _exec
+  REQUIRED_VARS MPIEXEC_EXECUTABLE
   HANDLE_COMPONENTS)
 
 if(MPI_C_FOUND)
@@ -415,6 +415,10 @@ endif(MPI_Fortran_FOUND)
 if(MPI_FOUND)
   set(MPI_LIBRARIES ${MPI_Fortran_LIBRARIES} ${MPI_C_LIBRARIES})
   set(MPI_INCLUDE_DIRS ${MPI_Fortran_INCLUDE_DIRS} ${MPI_C_INCLUDE_DIRS})
+
+  set(MPIEXEC_NUMPROC_FLAG "-n"  CACHE STRING "Flag used by MPI to specify the number of processes for mpiexec; the next option will be the number of processes.")
+  cmake_host_system_information(RESULT _n QUERY NUMBER_OF_PHYSICAL_CORES)
+  set(MPIEXEC_MAX_NUMPROCS "${_n}" CACHE STRING "Maximum number of processors available to run MPI applications.")
 endif()
 
 mark_as_advanced(MPI_Fortran_LIBRARY MPI_Fortran_INCLUDE_DIR MPI_C_LIBRARY MPI_C_INCLUDE_DIR)
