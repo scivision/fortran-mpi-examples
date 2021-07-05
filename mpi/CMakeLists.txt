@@ -2,7 +2,7 @@ include(CheckSourceCompiles)
 
 check_source_compiles(Fortran
 "program test
-use mpi_f08
+use mpi_f08, only : mpi_comm_rank, mpi_comm_world, mpi_init, mpi_finalize
 end program"
 mpif08)
 
