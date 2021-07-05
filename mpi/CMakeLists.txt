@@ -1,17 +1,6 @@
-include(CheckSourceCompiles)
-
-check_source_compiles(Fortran
-"program test
-use mpi_f08, only : mpi_comm_rank, mpi_comm_world, mpi_init, mpi_finalize
-end program"
-mpif08)
-
-if(NOT mpif08)
-  message(STATUS "SKIP: MPI-3 interface not available")
-  return()
-endif()
-
 # --- does MPI library work at all
+
+if(MPI_Fortran_HAVE_F08_MODULE)
 
 add_executable(mpi_basic basic.f90)
 target_link_libraries(mpi_basic MPI::MPI_Fortran)
@@ -22,6 +11,8 @@ add_executable(mpi_version mpivers.f90)
 target_link_libraries(mpi_version MPI::MPI_Fortran)
 add_test(NAME mpi:fortran:version COMMAND $<TARGET_FILE:mpi_version>)
 set_tests_properties(mpi:fortran:version PROPERTIES TIMEOUT 5)
+
+endif(MPI_Fortran_HAVE_F08_MODULE)
 
 
 add_executable(mpi_basic-C basic.c)
@@ -35,6 +26,11 @@ add_test(NAME mpi:C:version COMMAND $<TARGET_FILE:mpi_version-C>)
 set_tests_properties(mpi:C:version PROPERTIES TIMEOUT 5)
 
 # --- more than one MPI image
+
+if(NOT MPI_Fortran_HAVE_F08_MODULE)
+  message(STATUS "SKIP: MPI-3 Fortran tests")
+  return()
+endif()
 
 add_executable(mpi_hello helloworld.f90)
 target_link_libraries(mpi_hello MPI::MPI_Fortran)
