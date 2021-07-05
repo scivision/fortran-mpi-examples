@@ -12,6 +12,7 @@ if(NOT Coarray_FOUND)
   return()
 endif()
 
+set(CMAKE_REQUIRED_LIBRARIES Coarray::Coarray)
 check_source_runs(Fortran
 "program test
 real :: x[*]
