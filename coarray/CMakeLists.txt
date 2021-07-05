@@ -3,6 +3,8 @@
 # Linux: apt install libcoarrays-dev open-coarrays-bin
 # Mac: brew install opencoarrays
 
+include(CheckSourceRuns)
+
 find_package(Coarray)
 
 if(NOT (Coarray_FOUND AND MPI_Fortran_FOUND))
@@ -11,17 +13,28 @@ if(NOT (Coarray_FOUND AND MPI_Fortran_FOUND))
 endif()
 
 # "sync all" call is necessary to actually verify dynamically linked MPI stack works.
-include(CheckFortranSourceRuns)
+
 set(CMAKE_REQUIRED_FLAGS)
 set(CMAKE_REQUIRED_INCLUDES)
 set(CMAKE_REQUIRED_LIBRARIES Coarray::Coarray)
-check_fortran_source_runs("sync all; end" f08coarray SRC_EXT f90)
+check_source_runs(Fortran
+"program test
+sync all
+end program"
+f08coarray)
+
 if(NOT f08coarray)
   message(STATUS "SKIP: Coarray")
   return()
 endif()
-check_fortran_source_runs("real :: x[*]; call co_sum(x); sync all; end"
-   f18coarray SRC_EXT f90)
+
+check_source_runs(Fortran
+"program test
+real :: x[*]
+call co_sum(x)
+sync all
+end program"
+f18coarray)
 
 add_executable(coarray_hello helloworld.f90)
 target_link_libraries(coarray_hello PRIVATE Coarray::Coarray)

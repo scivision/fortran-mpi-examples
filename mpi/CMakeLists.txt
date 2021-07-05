@@ -1,3 +1,16 @@
+include(CheckSourceCompiles)
+
+check_source_compiles(Fortran
+"program test
+use mpi_f08
+end program"
+mpif08)
+
+if(NOT mpif08)
+  message(STATUS "SKIP: MPI-3 interface not available")
+  return()
+endif()
+
 # --- does MPI library work at all
 
 add_executable(mpi_basic basic.f90)
