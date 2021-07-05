@@ -24,16 +24,6 @@ Run self-tests:
 ctest --test-dir build
 ```
 
-## Windows
-
-For Windows users,
-[MS-MPI](https://docs.microsoft.com/en-us/message-passing-interface/microsoft-mpi)
-Fortran interface is not yet MPI 3.0 API.
-Windows users (and others) can use
-[Intel oneAPI](https://www.scivision.dev/intel-oneapi-fortran-install/)
-with HPC Toolkit to use MPI 3.0 in Fortran.
-Note: when using oneAPI, be sure to set environment variable `FC=ifort`, as ifx isn't yet ready.
-
 ## Message Passing
 
 Pass data between two MPI threads.

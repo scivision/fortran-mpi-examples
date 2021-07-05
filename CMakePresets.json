@@ -1,10 +1,5 @@
 {
   "version": 2,
-  "cmakeMinimumRequired": {
-    "major": 3,
-    "minor": 20,
-    "patch": 0
-},
 
 "configurePresets": [
 {
@@ -14,23 +9,13 @@
   "cacheVariables": {"CMAKE_BUILD_TYPE": "Release"}
 },
 {
-  "name": "make", "inherits": "default",
-  "displayName": "build with GNU Make",
-  "generator": "Unix Makefiles"
-},
-{
-  "name": "makewin", "inherits": "default",
-  "displayName": "build with GNU Make: Windows",
-  "generator": "MinGW Makefiles"
-},
-{
   "name": "intel", "inherits": "default",
   "displayName": "Intel Classic compiler: Linux/MacOS",
+  "binaryDir": "${sourceDir}/build-intel",
   "environment": {
     "CC": "icc",
     "CXX": "icpc",
-    "FC": "ifort",
-    "MPI_ROOT": "$env{I_MPI_ROOT}"
+    "FC": "ifort"
   }
 },
 {
@@ -55,6 +40,10 @@
   {
     "name": "default",
     "configurePreset": "default"
+  },
+  {
+    "name": "intel",
+    "configurePreset": "intel"
   }
 ],
 "testPresets": [
@@ -67,7 +56,12 @@
   },
   "execution": {
     "noTestsAction": "error",
-    "stopOnFailure": false}
+    "stopOnFailure": false
+  }
+},
+{
+  "name": "intel", "inherits": "default",
+  "configurePreset": "intel"
 }
 ]
 }
