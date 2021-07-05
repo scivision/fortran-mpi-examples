@@ -65,7 +65,7 @@ elseif(CMAKE_Fortran_COMPILER_ID IN_LIST opencoarray_supported)
 
   add_library(Coarray::Coarray INTERFACE IMPORTED)
 
-  find_package(OpenCoarrays)
+  find_package(OpenCoarrays QUIET)
   if(OpenCoarrays_FOUND)
     target_link_libraries(Coarray::Coarray INTERFACE OpenCoarrays::opencoarrays_mod OpenCoarrays::caf_mpi_static)
     get_target_property(_l OpenCoarrays::caf_mpi_static LOCATION)
@@ -76,9 +76,7 @@ elseif(CMAKE_Fortran_COMPILER_ID IN_LIST opencoarray_supported)
     set(Coarray_INCLUDE_DIR ${_l})
   else()
     find_package(PkgConfig)
-    if(PKG_CONFIG_FOUND)
-      pkg_search_module(pc_caf caf caf-openmpi caf-mpich)
-    endif()
+    pkg_search_module(pc_caf caf caf-openmpi caf-mpich)
 
     find_library(Coarray_LIBRARY
       NAMES ${pc_caf_LIBRARIES} opencoarrays_mod
