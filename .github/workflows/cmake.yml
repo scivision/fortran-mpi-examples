@@ -1,5 +1,9 @@
 name: cmake
 
+env:
+    CMAKE_BUILD_PARALLEL_LEVEL: 3
+    CTEST_PARALLEL_LEVEL: 3
+
 on:
   push:
     paths:
@@ -24,6 +28,6 @@ jobs:
         sudo apt -yq update
         sudo apt -yq install --no-install-recommends libopenmpi-dev libcoarrays-dev libcoarrays-openmpi-dev
 
-    - run: cmake -B build
-    - run: cmake --build build --parallel
-    - run: ctest --test-dir build
+    - run: cmake --preset default
+    - run: cmake --build --preset default
+    - run: ctest --preset default
