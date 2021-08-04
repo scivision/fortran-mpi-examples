@@ -16,16 +16,82 @@ on:
 
 jobs:
 
-  linux:
+  linux-openmpi:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
 
-    - name: install presets
+    - name: install prereqs
       run: |
         sudo apt -yq update
         sudo apt -yq install --no-install-recommends libopenmpi-dev libcoarrays-dev libcoarrays-openmpi-dev
 
-    - run: cmake --preset default
+    - name: CMake configure
+      run: cmake --preset default
+    - name: configure log
+      if: ${{ failure() }}
+      run: cat build/CMakeFiles/CMakeError.log
+
+    - run: cmake --build --preset default
+    - run: ctest --preset default
+
+  linux-mpich:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: install prereqs
+      run: |
+        sudo apt -yq update
+        sudo apt -yq install --no-install-recommends libmpich-dev
+
+    - name: CMake configure
+      run: cmake --preset default
+    - name: configure log
+      if: ${{ failure() }}
+      run: cat build/CMakeFiles/CMakeError.log
+
+    - run: cmake --build --preset default
+    - run: ctest --preset default
+
+  mac-openmpi:
+    needs: linux-openmpi
+    runs-on: macos-latest
+    env:
+      FC: gfortran-11
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: install prereqs
+      run: brew install openmpi
+
+    - name: CMake configure
+      run: cmake --preset default
+    - name: configure log
+      if: ${{ failure() }}
+      run: cat build/CMakeFiles/CMakeError.log
+
+    - run: cmake --build --preset default
+    - run: ctest --preset default
+
+  mac-mpich:
+    needs: linux-mpich
+    runs-on: macos-latest
+    env:
+      FC: gfortran-11
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: install prereqs
+      run: brew install mpich
+
+    - name: CMake configure
+      run: cmake --preset default
+    - name: configure log
+      if: ${{ failure() }}
+      run: cat build/CMakeFiles/CMakeError.log
+
     - run: cmake --build --preset default
     - run: ctest --preset default
