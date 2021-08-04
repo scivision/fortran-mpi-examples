@@ -1,8 +1,8 @@
 name: cmake
 
 env:
-    CMAKE_BUILD_PARALLEL_LEVEL: 3
-    CTEST_PARALLEL_LEVEL: 3
+    CMAKE_BUILD_PARALLEL_LEVEL: 2
+    CTEST_PARALLEL_LEVEL: 2
 
 on:
   push:
@@ -18,8 +18,6 @@ jobs:
 
   linux:
     runs-on: ubuntu-latest
-    env:
-      CTEST_PARALLEL_LEVEL: 2
     steps:
     - uses: actions/checkout@v2
 
