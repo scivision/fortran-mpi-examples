@@ -65,8 +65,6 @@ Imported Targets
 include(CheckSourceCompiles)
 
 set(CMAKE_REQUIRED_FLAGS)
-set(_hints)
-set(_hints_inc)
 
 
 function(get_flags exec outvar)
@@ -183,10 +181,6 @@ else()
   set(mpi_libname mpi)
 endif()
 
-if(NOT MPI_C_COMPILER)
-  pkg_search_module(pc_mpi_c ompi-c ompi mpich)
-endif()
-
 if(CMAKE_C_COMPILER_ID MATCHES "^Intel")
   set(wrap_name mpiicc mpiicc.bat)
 else()
@@ -195,7 +189,7 @@ endif()
 
 find_program(MPI_C_COMPILER
   NAMES ${wrap_name}
-  HINTS ${_hints}
+  HINTS ${pc_mpi_c_PREFIX} ${_hints}
   NAMES_PER_DIR
   PATHS ${_binpref}
   PATH_SUFFIXES ${_binsuf}
@@ -320,7 +314,7 @@ else()
   set(mpi_libname mpi_cxx mpi)
 endif()
 
-if(NOT MPI_CXX_COMPILER)
+if(NOT (HDF5_ROOT OR DEFINED MPI_CXX_COMPILER))
   pkg_search_module(pc_mpi_cxx ompi-cxx ompi mpich)
 endif()
 
@@ -332,7 +326,7 @@ endif()
 
 find_program(MPI_CXX_COMPILER
   NAMES ${wrap_name}
-  HINTS ${_hints}
+  HINTS ${pc_mpi_cxx_PREFIX} ${_hints}
   NAMES_PER_DIR
   PATHS ${_binpref}
   PATH_SUFFIXES ${_binsuf}
@@ -418,7 +412,7 @@ else()
   set(mpi_libname mpi_usempif08 mpi_usempi_ignore_tkr mpi_mpifh mpi)
 endif()
 
-if(NOT MPI_Fortran_COMPILER)
+if(NOT (HDF5_ROOT OR DEFINED MPI_Fortran_COMPILER))
   pkg_search_module(pc_mpi_f ompi-fort ompi mpich)
 endif()
 
@@ -430,7 +424,7 @@ endif()
 
 find_program(MPI_Fortran_COMPILER
   NAMES ${wrap_name}
-  HINTS ${_hints}
+  HINTS ${pc_mpi_f_PREFIX} ${_hints}
   NAMES_PER_DIR
   PATHS ${_binpref}
   PATH_SUFFIXES ${_binsuf}
@@ -520,22 +514,36 @@ endfunction(find_fortran)
 
 #===== main program ======
 
+set(_hints)
+set(_hints_inc)
+
 find_package(PkgConfig)
 find_package(Threads)
+
+if(NOT MPI_ROOT AND ENV{MPI_ROOT})
+  set(MPI_ROOT $ENV{MPI_ROOT})
+endif()
 
 # Intel MPI, which works with non-Intel compilers on Linux
 if((CMAKE_SYSTEM_NAME STREQUAL Linux OR CMAKE_C_COMPILER_ID MATCHES "^Intel") AND
       DEFINED ENV{I_MPI_ROOT})
-  list(APPEND _hints $ENV{I_MPI_ROOT})
+  set(_hints $ENV{I_MPI_ROOT})
 endif()
 
 if(WIN32 AND NOT CMAKE_C_COMPILER_ID MATCHES "^Intel")
-  list(APPEND _hints $ENV{MSMPI_LIB64})
-  list(APPEND _hints_inc $ENV{MSMPI_INC})
+  set(_hints $ENV{MSMPI_LIB64})
+  set(_hints_inc $ENV{MSMPI_INC})
 endif()
 
-set(_lsuf release openmpi/lib mpich/lib)
-set(_binsuf bin openmpi/bin mpich/bin)
+if(NOT HDF5_ROOT)
+  if(DEFINED ENV{I_MPI_ROOT})
+    set(_lsuf release)
+  else()
+    set(_lsuf openmpi/lib mpich/lib)
+  endif()
+
+  set(_binsuf bin openmpi/bin mpich/bin)
+endif()
 
 if(UNIX)
   set(_binpref /usr/lib64)
@@ -543,10 +551,14 @@ else()
   set(_binpref $ENV{MINGWROOT} $ENV{MSMPI_BIN})
 endif()
 
+if(NOT (HDF5_ROOT OR DEFINED MPI_C_COMPILER))
+  pkg_search_module(pc_mpi_c ompi-c ompi mpich)
+endif()
+
 # must have MPIexec to be worthwhile (de facto standard is mpiexec)
 find_program(MPIEXEC_EXECUTABLE
   NAMES mpiexec mpirun orterun
-  HINTS ${_hints}
+  HINTS ${pc_mpi_c_PREFIX} ${_hints}
   PATHS ${_binpref}
   PATH_SUFFIXES ${_binsuf}
 )
