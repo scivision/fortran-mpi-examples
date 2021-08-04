@@ -104,10 +104,45 @@ list(TRANSFORM _Wflags STRIP)
 if(_Wflags)
   # this transform avoids CMake stripping out all "-Wl,rpath" after first.
   # Example:
-  #  -Wl,rpath -Wl,/path/to/lib -Wl,rpath -Wl,/path/to/another
+  #  -Wl,rpath -Wl,/path/to/A -Wl,rpath -Wl,/path/to/B
+  # becomes
+  #  -Wl,-rpath,/path/to/A -Wl,-rpath,/path/to/B
   list(TRANSFORM _Wflags REPLACE "-Wl," "LINKER:")
-  list(APPEND _flags "${_Wflags}")
-else()
+
+  list(LENGTH _Wflags L)
+  math(EXPR L "${L}-1")
+  set(_work)
+  set(skip -1)
+  foreach(i RANGE ${L})
+    list(GET _Wflags ${i} f)
+    if("${f}" MATCHES "(^| )(LINKER:)([^\" ]+|\"[^\"]+\")")
+      # attach to prior rpath
+      if("${CMAKE_MATCH_3}" STREQUAL "-rpath")
+        # "LINKER:-rpath" with path as next argument
+        math(EXPR j "${i}+1")
+        list(GET _Wflags ${j} fp)
+        string(SUBSTRING "${fp}" 7 -1 p) # path without LINKER: prefix
+
+        if(IS_DIRECTORY "${p}")
+          # it's an rpath,directory so skip this flag next iteration
+          string(APPEND f ",${p}")
+          set(skip ${j})
+        else()
+          # if not a directory, just append it in the next iteration
+        endif()
+      elseif(i EQUAL ${skip})
+        # already added in prior step
+        continue()
+      endif()
+    endif()
+
+    list(APPEND _work "${f}")
+  endforeach()
+
+  list(APPEND _flags "${_work}")
+
+else(_Wflags)
+
   pop_flag("${raw}" -Xlinker _Xflags)
   if(_Xflags)
     set(CMAKE_C_LINKER_WRAPPER_FLAG "-Xlinker" " ")
@@ -116,7 +151,8 @@ else()
     string(REPLACE ";" "," _Xflags "${_Xflags}")
     list(APPEND _flags "LINKER:${_Xflags}")
   endif()
-endif()
+
+endif(_Wflags)
 
 set(${outvar} "${_flags}" PARENT_SCOPE)
 
