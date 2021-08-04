@@ -104,16 +104,15 @@ if("${raw}" MATCHES "^/")
   endif()
 endif()
 
+# Linker flags "-Wl,..."
 string(REGEX MATCHALL "(^| )(-Wl,)([^\" ]+|\"[^\"]+\")" _Wflags "${raw}")
 list(TRANSFORM _Wflags STRIP)
 if(_Wflags)
-  set(CMAKE_C_LINKER_WRAPPER_FLAG "-Wl,")
-  set(CMAKE_C_LINKER_WRAPPER_FLAG_SEP ",")
-  set(CMAKE_CXX_LINKER_WRAPPER_FLAG "-Wl,")
-  set(CMAKE_CXX_LINKER_WRAPPER_FLAG_SEP ",")
-  set(CMAKE_Fortran_LINKER_WRAPPER_FLAG "-Wl,")
-  set(CMAKE_Fortran_LINKER_WRAPPER_FLAG_SEP ",")
-  list(APPEND _flags ${_Wflags})
+  # this transform avoids CMake stripping out all "-Wl,rpath" after first.
+  # Example:
+  #  -Wl,rpath -Wl,/path/to/lib -Wl,rpath -Wl,/path/to/another
+  list(TRANSFORM _Wflags REPLACE "-Wl," "LINKER:")
+  list(APPEND _flags "${_Wflags}")
 else()
   pop_flag("${raw}" -Xlinker _Xflags)
   if(_Xflags)
@@ -125,7 +124,7 @@ else()
   endif()
 endif()
 
-set(${outvar} ${_flags} PARENT_SCOPE)
+set(${outvar} "${_flags}" PARENT_SCOPE)
 
 endfunction(get_link_flags)
 
