@@ -311,7 +311,7 @@ if(WIN32)
     set(mpi_libname msmpi)
   endif()
 else()
-  set(mpi_libname mpi_cxx mpi)
+  set(mpi_libname mpi_cxx mpichcxx mpi)
 endif()
 
 if(NOT (HDF5_ROOT OR DEFINED MPI_CXX_COMPILER))
@@ -409,7 +409,7 @@ if(WIN32)
     set(mpi_libname msmpi)
   endif()
 else()
-  set(mpi_libname mpi_usempif08 mpi_usempi_ignore_tkr mpi_mpifh mpi)
+  set(mpi_libname mpi_usempif08 mpi_usempi_ignore_tkr mpi_mpifh mpifort mpi)
 endif()
 
 if(NOT (HDF5_ROOT OR DEFINED MPI_Fortran_COMPILER))
@@ -496,9 +496,14 @@ end program
 MPI_Fortran_links)
 
 check_source_compiles(Fortran
-"program test
+[=[
+program test
 use mpi_f08, only : mpi_comm_rank, mpi_comm_world, mpi_init, mpi_finalize
-end program"
+implicit none
+call mpi_init
+call mpi_finalize
+end program
+]=]
 MPI_Fortran_HAVE_F08_MODULE)
 
 if(MPI_Fortran_links)
