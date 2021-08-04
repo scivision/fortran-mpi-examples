@@ -61,12 +61,8 @@ Imported Targets
   imported target for <LANG>  e.g. ``MPI::MPI_C`` or ``MPI::MPI_Fortran``
 
 
-
-
 #]=======================================================================]
-include(CheckFortranSourceCompiles)
-include(CheckCSourceCompiles)
-include(CheckCXXSourceCompiles)
+include(CheckSourceCompiles)
 
 set(CMAKE_REQUIRED_FLAGS)
 set(_hints)
@@ -171,24 +167,20 @@ endfunction(pop_path)
 
 function(find_c)
 
-# mpich: mpi pmpi
-# openmpi: mpi
+# mpich / openmpi / Intel MPI: mpi
 # MS-MPI: msmpi
 # Intel Windows: impi
-# Intel MPI: mpi
 
 set(MPI_C_LIBRARY)
 
 if(WIN32)
   if(CMAKE_C_COMPILER_ID MATCHES "^Intel")
-    set(names impi)
+    set(mpi_libname impi)
   else()
-    set(names msmpi)
+    set(mpi_libname msmpi)
   endif()
-elseif(DEFINED ENV{I_MPI_ROOT})
-  set(names mpi)
 else()
-  set(names mpi pmpi)
+  set(mpi_libname mpi)
 endif()
 
 if(NOT MPI_C_COMPILER)
@@ -209,48 +201,34 @@ find_program(MPI_C_COMPILER
   PATH_SUFFIXES ${_binsuf}
   )
 if(MPI_C_COMPILER)
-  get_filename_component(mpi_root ${MPI_C_COMPILER} DIRECTORY)
-  get_filename_component(mpi_root ${mpi_root} DIRECTORY)
+  cmake_path(GET MPI_C_COMPILER PARENT_PATH mpi_root)
+  cmake_path(GET mpi_root PARENT_PATH mpi_root)
 
   get_flags(${MPI_C_COMPILER} c_raw)
   if(c_raw)
     pop_flag(${c_raw} -I inc_dirs)
-    pop_flag(${c_raw} ${CMAKE_LIBRARY_PATH_FLAG} lib_dirs)
+    pop_flag(${c_raw} ${CMAKE_LIBRARY_PATH_FLAG} mpi_libdirs)
 
-    pop_flag(${c_raw} -l lib_names)
-    if(lib_names)
-      set(names ${lib_names})
-    endif()
-
-    pop_path(${c_raw} lib_paths)
-    set(MPI_C_LIBRARY ${lib_paths})
+    pop_path(${c_raw} MPI_C_LIBRARY_fullpath)
 
     get_link_flags(${c_raw} MPI_C_LINK_FLAGS)
   endif(c_raw)
 endif(MPI_C_COMPILER)
 
-foreach(n ${names})
+find_library(MPI_C_LIBRARY
+  NAMES ${mpi_libname}
+  HINTS ${mpi_libdirs} ${mpi_root} ${pc_mpi_c_LIBRARY_DIRS} ${pc_mpi_c_LIBDIR} ${_hints}
+  PATH_SUFFIXES ${_lsuf}
+)
 
-  find_library(MPI_C_${n}_LIBRARY
-    NAMES ${n}
-    HINTS ${lib_dirs} ${mpi_root} ${pc_mpi_c_LIBRARY_DIRS} ${pc_mpi_c_LIBDIR} ${_hints}
-    PATH_SUFFIXES ${_lsuf}
-  )
-  if(MPI_C_${n}_LIBRARY)
-    list(APPEND MPI_C_LIBRARY ${MPI_C_${n}_LIBRARY})
-  endif()
-
-endforeach()
-if(NOT MPI_C_LIBRARY)
-  return()
-endif()
+list(APPEND MPI_C_LIBRARY ${MPI_C_LIBRARY_fullpath})
 
 find_path(MPI_C_INCLUDE_DIR
   NAMES mpi.h
   HINTS ${inc_dirs} ${mpi_root} ${pc_mpi_c_INCLUDE_DIRS} ${_hints} ${_hints_inc}
   PATH_SUFFIXES ${mpi_incsuf}
 )
-if(NOT MPI_C_INCLUDE_DIR)
+if(NOT (MPI_C_LIBRARY AND MPI_C_INCLUDE_DIR))
   return()
 endif()
 
@@ -301,7 +279,8 @@ MPI_C_LINK_FLAGS: ${MPI_C_LINK_FLAGS}")
   set(MPI_VERSION ${MPI_VERSION} CACHE STRING "MPI API level")
 endif()
 
-check_c_source_compiles("
+check_source_compiles(C
+[=[
 #include <mpi.h>
 #ifndef NULL
 #define NULL 0
@@ -309,42 +288,37 @@ check_c_source_compiles("
 int main(void) {
     MPI_Init(NULL, NULL);
     MPI_Finalize();
-    return 0;}
-" MPI_C_links)
-if(NOT MPI_C_links)
-  return()
-endif()
+    return 0;
+  }
+]=]
+MPI_C_links)
 
-set(MPI_C_INCLUDE_DIR ${MPI_C_INCLUDE_DIR} PARENT_SCOPE)
-set(MPI_C_LIBRARY ${MPI_C_LIBRARY} PARENT_SCOPE)
-set(MPI_C_LINK_FLAGS ${MPI_C_LINK_FLAGS} PARENT_SCOPE)
-set(MPI_C_FOUND true PARENT_SCOPE)
+if(MPI_C_links)
+  set(MPI_C_INCLUDE_DIR ${MPI_C_INCLUDE_DIR} PARENT_SCOPE)
+  set(MPI_C_LIBRARY "${MPI_C_LIBRARY}" PARENT_SCOPE)
+  set(MPI_C_LINK_FLAGS "${MPI_C_LINK_FLAGS}" PARENT_SCOPE)
+  set(MPI_C_FOUND true PARENT_SCOPE)
+endif()
 
 endfunction(find_c)
 
 
 function(find_cxx)
 
-# mpich: mpi pmpi
-# openmpi: mpi_cxx mpi
+# mpich / openmpi / IntelMPI: mpi
 # MS-MPI: msmpi
 # Intel Windows: impi
-# Intel MPI: mpi
 
 set(MPI_CXX_LIBRARY)
 
 if(WIN32)
   if(CMAKE_CXX_COMPILER_ID MATCHES "^Intel")
-    set(names impi)
+    set(mpi_libname impi)
   else()
-    set(names msmpi)
+    set(mpi_libname msmpi)
   endif()
-elseif(DEFINED ENV{I_MPI_ROOT})
-  set(names mpi)
 else()
-  set(names
-    mpi_cxx mpi
-    mpichcxx mpi pmpi)
+  set(mpi_libname mpi_cxx mpi)
 endif()
 
 if(NOT MPI_CXX_COMPILER)
@@ -365,48 +339,37 @@ find_program(MPI_CXX_COMPILER
   PATH_SUFFIXES ${_binsuf}
   )
 if(MPI_CXX_COMPILER)
-  get_filename_component(mpi_root ${MPI_CXX_COMPILER} DIRECTORY)
-  get_filename_component(mpi_root ${mpi_root} DIRECTORY)
+  cmake_path(GET MPI_CXX_COMPILER PARENT_PATH mpi_root)
+  cmake_path(GET mpi_root PARENT_PATH mpi_root)
 
   get_flags(${MPI_CXX_COMPILER} cxx_raw)
   if(cxx_raw)
     pop_flag(${cxx_raw} -I inc_dirs)
-    pop_flag(${cxx_raw} ${CMAKE_LIBRARY_PATH_FLAG} lib_dirs)
+    pop_flag(${cxx_raw} ${CMAKE_LIBRARY_PATH_FLAG} mpi_libdirs)
 
-    pop_flag(${cxx_raw} -l lib_names)
-    if(lib_names)
-      set(names ${lib_names})
-    endif()
-
-    pop_path(${cxx_raw} lib_paths)
-    set(MPI_CXX_LIBRARY ${lib_paths})
+    pop_path(${cxx_raw} MPI_CXX_LIBRARY)
 
     get_link_flags(${cxx_raw} MPI_CXX_LINK_FLAGS)
   endif(cxx_raw)
 endif(MPI_CXX_COMPILER)
 
-foreach(n ${names})
-
+foreach(n ${mpi_libname})
   find_library(MPI_CXX_${n}_LIBRARY
     NAMES ${n}
-    HINTS ${lib_dirs} ${mpi_root} ${pc_mpi_cxx_LIBRARY_DIRS} ${pc_mpi_cxx_LIBDIR} ${_hints}
+    HINTS ${mpi_libdirs} ${mpi_root} ${pc_mpi_cxx_LIBRARY_DIRS} ${pc_mpi_cxx_LIBDIR} ${_hints}
     PATH_SUFFIXES ${_lsuf}
   )
   if(MPI_CXX_${n}_LIBRARY)
     list(APPEND MPI_CXX_LIBRARY ${MPI_CXX_${n}_LIBRARY})
   endif()
-
 endforeach()
-if(NOT MPI_CXX_LIBRARY)
-  return()
-endif()
 
 find_path(MPI_CXX_INCLUDE_DIR
   NAMES mpi.h
   HINTS ${inc_dirs} ${mpi_root} ${pc_mpi_cxx_INCLUDE_DIRS} ${_hints} ${_hints_inc}
   PATH_SUFFIXES ${mpi_incsuf}
 )
-if(NOT MPI_CXX_INCLUDE_DIR)
+if(NOT (MPI_CXX_LIBRARY AND MPI_CXX_INCLUDE_DIR))
   return()
 endif()
 
@@ -415,7 +378,8 @@ set(CMAKE_REQUIRED_LINK_OPTIONS ${MPI_CXX_LINK_FLAGS})
 set(CMAKE_REQUIRED_LIBRARIES ${MPI_CXX_LIBRARY})
 list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
 
-check_cxx_source_compiles("
+check_source_compiles(CXX
+[=[
 #include <mpi.h>
 #ifndef NULL
 #define NULL 0
@@ -423,43 +387,37 @@ check_cxx_source_compiles("
 int main(void) {
     MPI_Init(NULL, NULL);
     MPI_Finalize();
-    return 0;}
-" MPI_CXX_links)
-if(NOT MPI_CXX_links)
-  return()
-endif()
+    return 0;
+  }
+]=]
+MPI_CXX_links)
 
-set(MPI_CXX_INCLUDE_DIR ${MPI_CXX_INCLUDE_DIR} PARENT_SCOPE)
-set(MPI_CXX_LIBRARY ${MPI_CXX_LIBRARY} PARENT_SCOPE)
-set(MPI_CXX_LINK_FLAGS ${MPI_CXX_LINK_FLAGS} PARENT_SCOPE)
-set(MPI_CXX_FOUND true PARENT_SCOPE)
+if(MPI_CXX_links)
+  set(MPI_CXX_INCLUDE_DIR ${MPI_CXX_INCLUDE_DIR} PARENT_SCOPE)
+  set(MPI_CXX_LIBRARY "${MPI_CXX_LIBRARY}" PARENT_SCOPE)
+  set(MPI_CXX_LINK_FLAGS "${MPI_CXX_LINK_FLAGS}" PARENT_SCOPE)
+  set(MPI_CXX_FOUND true PARENT_SCOPE)
+endif()
 
 endfunction(find_cxx)
 
 
 function(find_fortran)
 
-# mpich: mpifort mpi pmpi
-# openmpi: mpi_usempif08 mpi_usempi_ignore_tkr mpi_mpifh mpi
+# mpich / openmpi / Intel MPI: mpi
 # MS-MPI: msmpi
 # Intel Windows: impi
-# Intel MPI: mpifort mpi
 
 set(MPI_Fortran_LIBRARY)
 
 if(WIN32)
   if(CMAKE_Fortran_COMPILER_ID MATCHES "^Intel")
-    set(names impi)
+    set(mpi_libname impi)
   else()
-    set(names msmpi)
+    set(mpi_libname msmpi)
   endif()
-elseif(DEFINED ENV{I_MPI_ROOT})
-  set(names mpifort mpi)
 else()
-  set(names
-    mpi_usempif08 mpi_usempi_ignore_tkr mpi_mpifh mpi
-    mpifort mpichfort mpi pmpi
-    )
+  set(mpi_libname mpi_usempif08 mpi_usempi_ignore_tkr mpi_mpifh mpi)
 endif()
 
 if(NOT MPI_Fortran_COMPILER)
@@ -480,41 +438,30 @@ find_program(MPI_Fortran_COMPILER
   PATH_SUFFIXES ${_binsuf}
   )
 if(MPI_Fortran_COMPILER)
-  get_filename_component(mpi_root ${MPI_Fortran_COMPILER} DIRECTORY)
-  get_filename_component(mpi_root ${mpi_root} DIRECTORY)
+  cmake_path(GET MPI_Fortran_COMPILER PARENT_PATH mpi_root)
+  cmake_path(GET mpi_root PARENT_PATH mpi_root)
 
   get_flags(${MPI_Fortran_COMPILER} f_raw)
   if(f_raw)
     pop_flag(${f_raw} -I inc_dirs)
-    pop_flag(${f_raw} ${CMAKE_LIBRARY_PATH_FLAG} lib_dirs)
+    pop_flag(${f_raw} ${CMAKE_LIBRARY_PATH_FLAG} mpi_libdirs)
 
-    pop_flag(${f_raw} -l lib_names)
-    if(lib_names)
-      set(names ${lib_names})
-    endif()
-
-    pop_path(${f_raw} lib_paths)
-    set(MPI_Fortran_LIBRARY ${lib_paths})
+    pop_path(${f_raw} MPI_Fortran_LIBRARY)
 
     get_link_flags(${f_raw} MPI_Fortran_LINK_FLAGS)
   endif(f_raw)
 endif(MPI_Fortran_COMPILER)
 
-foreach(n ${names})
-
+foreach(n ${mpi_libname})
   find_library(MPI_Fortran_${n}_LIBRARY
     NAMES ${n}
-    HINTS ${lib_dirs} ${mpi_root} ${pc_mpi_f_LIBRARY_DIRS} ${pc_mpi_f_LIBDIR} ${_hints}
+    HINTS ${mpi_libdirs} ${mpi_root} ${pc_mpi_f_LIBRARY_DIRS} ${pc_mpi_f_LIBDIR} ${_hints}
     PATH_SUFFIXES ${_lsuf}
   )
   if(MPI_Fortran_${n}_LIBRARY)
     list(APPEND MPI_Fortran_LIBRARY ${MPI_Fortran_${n}_LIBRARY})
   endif()
-
 endforeach()
-if(NOT MPI_Fortran_LIBRARY)
-  return()
-endif()
 
 set(_msuf)
 if(CMAKE_Fortran_COMPILER_ID STREQUAL GNU)
@@ -525,11 +472,8 @@ find_path(MPI_Fortran_INCLUDE_DIR
   NAMES mpi.mod
   HINTS ${inc_dirs} ${mpi_root} ${pc_mpi_f_INCLUDE_DIRS} ${_hints} ${_hints_inc}
   PATH_SUFFIXES lib ${_msuf}
-  # yes, openmpi puts .mod files into lib/
+  # openmpi puts .mod files into lib/
 )
-if(NOT MPI_Fortran_INCLUDE_DIR)
-  return()
-endif()
 
 if(WIN32 AND NOT CMAKE_Fortran_COMPILER_ID MATCHES "^Intel")
   find_path(MPI_Fortran_INCLUDE_EXTRA
@@ -543,35 +487,41 @@ if(WIN32 AND NOT CMAKE_Fortran_COMPILER_ID MATCHES "^Intel")
   endif()
 endif()
 
+if(NOT (MPI_Fortran_LIBRARY AND MPI_Fortran_INCLUDE_DIR))
+  return()
+endif()
+
 set(CMAKE_REQUIRED_INCLUDES ${MPI_Fortran_INCLUDE_DIR})
 set(CMAKE_REQUIRED_LINK_OPTIONS ${MPI_Fortran_LINK_FLAGS})
 set(CMAKE_REQUIRED_LIBRARIES ${MPI_Fortran_LIBRARY})
 list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
 
-check_fortran_source_compiles("
+check_source_compiles(Fortran
+[=[
 program test
 use mpi
 implicit none
 integer :: i
 call mpi_init(i)
 call mpi_finalize(i)
-end program" MPI_Fortran_links SRC_EXT F90)
-if(NOT MPI_Fortran_links)
-  return()
-endif()
+end program
+]=]
+MPI_Fortran_links)
 
-check_fortran_source_compiles(
+check_source_compiles(Fortran
 "program test
 use mpi_f08, only : mpi_comm_rank, mpi_comm_world, mpi_init, mpi_finalize
 end program"
-MPI_Fortran_HAVE_F08_MODULE SRC_EXT f90)
+MPI_Fortran_HAVE_F08_MODULE)
 
-set(MPI_Fortran_INCLUDE_DIR ${MPI_Fortran_INCLUDE_DIR} PARENT_SCOPE)
-set(MPI_Fortran_LIBRARY ${MPI_Fortran_LIBRARY} PARENT_SCOPE)
-set(MPI_Fortran_LINK_FLAGS ${MPI_Fortran_LINK_FLAGS} PARENT_SCOPE)
-set(MPI_Fortran_HAVE_F90_MODULE true PARENT_SCOPE)
-set(MPI_Fortran_HAVE_F08_MODULE ${MPI_Fortran_HAVE_F08_MODULE} PARENT_SCOPE)
-set(MPI_Fortran_FOUND true PARENT_SCOPE)
+if(MPI_Fortran_links)
+  set(MPI_Fortran_INCLUDE_DIR ${MPI_Fortran_INCLUDE_DIR} PARENT_SCOPE)
+  set(MPI_Fortran_LIBRARY "${MPI_Fortran_LIBRARY}" PARENT_SCOPE)
+  set(MPI_Fortran_LINK_FLAGS "${MPI_Fortran_LINK_FLAGS}" PARENT_SCOPE)
+  set(MPI_Fortran_HAVE_F90_MODULE true PARENT_SCOPE)
+  set(MPI_Fortran_HAVE_F08_MODULE ${MPI_Fortran_HAVE_F08_MODULE} PARENT_SCOPE)
+  set(MPI_Fortran_FOUND true PARENT_SCOPE)
+endif()
 
 endfunction(find_fortran)
 
@@ -709,5 +659,8 @@ if(MPI_FOUND)
     ")
 endif()
 
-mark_as_advanced(MPI_Fortran_LIBRARY MPI_Fortran_INCLUDE_DIR MPI_C_LIBRARY MPI_C_INCLUDE_DIR
-MPIEXEC_EXECUTABLE MPIEXEC_NUMPROC_FLAG MPIEXEC_MAX_NUMPROCS)
+mark_as_advanced(
+MPI_Fortran_LIBRARY MPI_Fortran_INCLUDE_DIR MPI_Fortran_HAVE_F90_MODULE MPI_Fortran_HAVE_F08_MODULE
+MPI_C_LIBRARY MPI_C_INCLUDE_DIR
+MPIEXEC_EXECUTABLE MPIEXEC_NUMPROC_FLAG MPIEXEC_MAX_NUMPROCS
+)
