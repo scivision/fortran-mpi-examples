@@ -228,7 +228,7 @@ find_program(MPI_C_COMPILER
   HINTS ${pc_mpi_c_PREFIX} ${_hints}
   NAMES_PER_DIR
   PATHS ${_binpref}
-  PATH_SUFFIXES ${_binsuf}
+  PATH_SUFFIXES ${mpi_binsuf}
   )
 if(MPI_C_COMPILER)
   cmake_path(GET MPI_C_COMPILER PARENT_PATH mpi_root)
@@ -248,7 +248,6 @@ endif(MPI_C_COMPILER)
 find_library(MPI_C_LIBRARY
   NAMES ${mpi_libname}
   HINTS ${mpi_libdirs} ${mpi_root} ${pc_mpi_c_LIBRARY_DIRS} ${pc_mpi_c_LIBDIR} ${_hints}
-  PATH_SUFFIXES ${_lsuf}
 )
 
 list(APPEND MPI_C_LIBRARY ${MPI_C_LIBRARY_fullpath})
@@ -347,7 +346,7 @@ if(WIN32)
     set(mpi_libname msmpi)
   endif()
 else()
-  set(mpi_libname mpi_cxx mpichcxx mpi)
+  set(mpi_libname mpi_cxx mpi)
 endif()
 
 if(NOT (HDF5_ROOT OR DEFINED MPI_CXX_COMPILER))
@@ -365,7 +364,7 @@ find_program(MPI_CXX_COMPILER
   HINTS ${pc_mpi_cxx_PREFIX} ${_hints}
   NAMES_PER_DIR
   PATHS ${_binpref}
-  PATH_SUFFIXES ${_binsuf}
+  PATH_SUFFIXES ${mpi_binsuf}
   )
 if(MPI_CXX_COMPILER)
   cmake_path(GET MPI_CXX_COMPILER PARENT_PATH mpi_root)
@@ -386,7 +385,6 @@ foreach(n ${mpi_libname})
   find_library(MPI_CXX_${n}_LIBRARY
     NAMES ${n}
     HINTS ${mpi_libdirs} ${mpi_root} ${pc_mpi_cxx_LIBRARY_DIRS} ${pc_mpi_cxx_LIBDIR} ${_hints}
-    PATH_SUFFIXES ${_lsuf}
   )
   if(MPI_CXX_${n}_LIBRARY)
     list(APPEND MPI_CXX_LIBRARY ${MPI_CXX_${n}_LIBRARY})
@@ -444,8 +442,13 @@ if(WIN32)
   else()
     set(mpi_libname msmpi)
   endif()
+elseif(DEFINED ENV{I_MPI_ROOT})
+  set(mpi_libname mpi)
 else()
-  set(mpi_libname mpi_usempif08 mpi_usempi_ignore_tkr mpi_mpifh mpifort mpi)
+  set(mpi_libname
+  mpi_usempif08 mpi_usempi_ignore_tkr mpi_mpifh
+  mpifort
+  mpi)
 endif()
 
 if(NOT (HDF5_ROOT OR DEFINED MPI_Fortran_COMPILER))
@@ -463,7 +466,7 @@ find_program(MPI_Fortran_COMPILER
   HINTS ${pc_mpi_f_PREFIX} ${_hints}
   NAMES_PER_DIR
   PATHS ${_binpref}
-  PATH_SUFFIXES ${_binsuf}
+  PATH_SUFFIXES ${mpi_binsuf}
   )
 if(MPI_Fortran_COMPILER)
   cmake_path(GET MPI_Fortran_COMPILER PARENT_PATH mpi_root)
@@ -484,7 +487,6 @@ foreach(n ${mpi_libname})
   find_library(MPI_Fortran_${n}_LIBRARY
     NAMES ${n}
     HINTS ${mpi_libdirs} ${mpi_root} ${pc_mpi_f_LIBRARY_DIRS} ${pc_mpi_f_LIBDIR} ${_hints}
-    PATH_SUFFIXES ${_lsuf}
   )
   if(MPI_Fortran_${n}_LIBRARY)
     list(APPEND MPI_Fortran_LIBRARY ${MPI_Fortran_${n}_LIBRARY})
@@ -576,14 +578,9 @@ if(WIN32 AND NOT CMAKE_C_COMPILER_ID MATCHES "^Intel")
   set(_hints_inc $ENV{MSMPI_INC})
 endif()
 
-if(NOT HDF5_ROOT)
-  if(DEFINED ENV{I_MPI_ROOT})
-    set(_lsuf release)
-  else()
-    set(_lsuf openmpi/lib mpich/lib)
-  endif()
-
-  set(_binsuf bin openmpi/bin mpich/bin)
+set(mpi_binsuf)
+if(NOT HDF5_ROOT AND NOT DEFINED ENV{I_MPI_ROOT})
+  set(mpi_binsuf bin openmpi/bin mpich/bin)
 endif()
 
 if(UNIX)
@@ -598,10 +595,10 @@ endif()
 
 # must have MPIexec to be worthwhile (de facto standard is mpiexec)
 find_program(MPIEXEC_EXECUTABLE
-  NAMES mpiexec mpirun orterun
+  NAMES mpiexec
   HINTS ${pc_mpi_c_PREFIX} ${_hints}
   PATHS ${_binpref}
-  PATH_SUFFIXES ${_binsuf}
+  PATH_SUFFIXES ${mpi_binsuf}
 )
 
 # like factory FindMPI, always find MPI_C
