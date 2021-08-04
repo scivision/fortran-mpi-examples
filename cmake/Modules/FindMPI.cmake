@@ -463,15 +463,10 @@ foreach(n ${mpi_libname})
   endif()
 endforeach()
 
-set(_msuf)
-if(CMAKE_Fortran_COMPILER_ID STREQUAL GNU)
-  set(_msuf gfortran/modules/openmpi gfortran/modules/mpich)
-endif()
-
 find_path(MPI_Fortran_INCLUDE_DIR
   NAMES mpi.mod
   HINTS ${inc_dirs} ${mpi_root} ${pc_mpi_f_INCLUDE_DIRS} ${_hints} ${_hints_inc}
-  PATH_SUFFIXES lib ${_msuf}
+  PATH_SUFFIXES lib
   # openmpi puts .mod files into lib/
 )
 
