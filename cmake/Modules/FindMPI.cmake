@@ -226,7 +226,6 @@ list(APPEND MPI_C_LIBRARY ${MPI_C_LIBRARY_fullpath})
 find_path(MPI_C_INCLUDE_DIR
   NAMES mpi.h
   HINTS ${inc_dirs} ${mpi_root} ${pc_mpi_c_INCLUDE_DIRS} ${_hints} ${_hints_inc}
-  PATH_SUFFIXES ${mpi_incsuf}
 )
 if(NOT (MPI_C_LIBRARY AND MPI_C_INCLUDE_DIR))
   return()
@@ -367,7 +366,6 @@ endforeach()
 find_path(MPI_CXX_INCLUDE_DIR
   NAMES mpi.h
   HINTS ${inc_dirs} ${mpi_root} ${pc_mpi_cxx_INCLUDE_DIRS} ${_hints} ${_hints_inc}
-  PATH_SUFFIXES ${mpi_incsuf}
 )
 if(NOT (MPI_CXX_LIBRARY AND MPI_CXX_INCLUDE_DIR))
   return()
@@ -544,19 +542,6 @@ if(UNIX)
 else()
   set(_binpref $ENV{MINGWROOT} $ENV{MSMPI_BIN})
 endif()
-
-if(UNIX)
-  execute_process(COMMAND uname -m
-    OUTPUT_VARIABLE arch
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    TIMEOUT 5)
-
-  if(arch STREQUAL x86_64)
-    set(mpi_incsuf openmpi-x86_64 mpich-x86_64)
-  elseif(arch STREQUAL aarch64)
-    set(mpi_incsuf openmpi-aarch64 mpich-aarch64)
-  endif()
-endif(UNIX)
 
 # must have MPIexec to be worthwhile (de facto standard is mpiexec)
 find_program(MPIEXEC_EXECUTABLE
