@@ -276,7 +276,7 @@ int version, subversion;
 
 int ierr = MPI_Get_version(&version, &subversion);
 if (ierr != 0) return 1;
-printf("%d.%d\n", version, subversion);
+printf("CMAKE_MPI_VERSION %d.%d\n", version, subversion);
 
 return 0;
 }
@@ -286,25 +286,31 @@ endif()
 
 if(NOT MPI_VERSION)
   message(CHECK_START "Checking MPI API level")
+
   try_run(mpi_run_code mpi_build_code
     ${CMAKE_CURRENT_BINARY_DIR}/find_mpi/build
     ${CMAKE_CURRENT_BINARY_DIR}/find_mpi/get_mpi_version.c
     CMAKE_FLAGS -DINCLUDE_DIRECTORIES=${MPI_C_INCLUDE_DIR}
     LINK_OPTIONS ${MPI_C_LINK_FLAGS}
     LINK_LIBRARIES ${MPI_C_LIBRARY}
-    RUN_OUTPUT_VARIABLE MPI_VERSION
+    RUN_OUTPUT_VARIABLE MPI_VERSION_STRING
   )
-  string(STRIP "${MPI_VERSION}" MPI_VERSION)
+
   if(mpi_build_code AND mpi_run_code EQUAL 0)
-    message(CHECK_PASS "${MPI_VERSION}")
-  else()
+    if("${MPI_VERSION_STRING}" MATCHES "CMAKE_MPI_VERSION ([0-9]+\\.[0-9]+)")
+      set(MPI_VERSION ${CMAKE_MATCH_1} CACHE STRING "MPI API level")
+      message(CHECK_PASS "${MPI_VERSION}")
+    endif()
+  endif()
+
+  if(NOT MPI_VERSION)
     message(CHECK_FAIL "MPI API not detected with:
-MPI_C_LIBRARY: ${MPI_C_LIBRARY}
-MPI_C_INCLUDE_DIR: ${MPI_C_INCLUDE_DIR}
-MPI_C_LINK_FLAGS: ${MPI_C_LINK_FLAGS}")
+      MPI_C_LIBRARY: ${MPI_C_LIBRARY}
+      MPI_C_INCLUDE_DIR: ${MPI_C_INCLUDE_DIR}
+      MPI_C_LINK_FLAGS: ${MPI_C_LINK_FLAGS}"
+    )
     return()
   endif()
-  set(MPI_VERSION ${MPI_VERSION} CACHE STRING "MPI API level")
 endif()
 
 check_source_compiles(C
