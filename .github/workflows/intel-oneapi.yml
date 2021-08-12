@@ -1,8 +1,8 @@
 name: intel-oneapi
 
 env:
-    CMAKE_BUILD_PARALLEL_LEVEL: 2
-    CTEST_PARALLEL_LEVEL: 2
+  CMAKE_BUILD_PARALLEL_LEVEL: 2
+  CTEST_PARALLEL_LEVEL: 2
 
 on:
   push:
@@ -18,12 +18,13 @@ jobs:
 
   linux-intel-oneapi:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
 
     steps:
     - uses: actions/checkout@v2
 
     - name: Intel Apt repository
+      timeout-minutes: 1
       run: |
         wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
         sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
@@ -32,6 +33,7 @@ jobs:
         sudo apt-get update
 
     - name: Install Intel oneAPI
+      timeout-minutes: 5
       run: sudo apt-get install intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-mkl ninja-build
 
     - name: Setup Intel oneAPI environment
