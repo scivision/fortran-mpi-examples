@@ -23,9 +23,6 @@ jobs:
   windows-oneapi:
     runs-on: windows-latest
     timeout-minutes: 10
-    defaults:
-      run:
-        shell: cmd
 
     steps:
     - uses: actions/checkout@v2
@@ -37,7 +34,7 @@ jobs:
 
     - name: Configure
       run: |
-        "%PROGRAMFILES(X86)%"\Intel\oneAPI\setvars.bat
+        cmd.exe "/K" '"%PROGRAMFILES(X86)%\Intel\oneAPI\setvars.bat" && powershell'
         cmake --preset intel -G "MinGW Makefiles"
 
     - name: build
