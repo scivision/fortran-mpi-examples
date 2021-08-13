@@ -1,0 +1,40 @@
+name: oneapi-windows
+
+env:
+  WINDOWS_BASEKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/17978/w_BaseKit_p_2021.3.0.3221.exe
+  WINDOWS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/17940/w_HPCKit_p_2021.3.0.3227.exe
+  CMAKE_BUILD_PARALLEL_LEVEL: 2
+  CTEST_PARALLEL_LEVEL: 2
+
+on:
+  push:
+    paths:
+      - "**.f90"
+      - "**.F90"
+      - "**.cmake"
+      - "**/CMakeLists.txt"
+      - ".github/workflows/intel-oneapi-windows.yml"
+
+
+jobs:
+
+  windows-oneapi:
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+    # https://software.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-macos/top/installation/install-using-package-managers.html
+    - name: download and install oneAPI
+      run: |
+        ./ci/install_windows_oneapi.bat %WINDOWS_HPC_URL% intel.oneapi.win.ifort-compiler:intel.oneapi.win.cpp-compiler:intel.oneapi.win.mpi.devel
+
+    - uses: actions/checkout@v2
+
+    - name: Configure
+      run: cmake --preset intel
+
+    - name: build
+      run: cmake --build --preset intel
+
+    - name: test
+      run: ctest --preset intel --output-junit test-oneapi.xml

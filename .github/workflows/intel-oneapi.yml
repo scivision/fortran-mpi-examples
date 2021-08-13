@@ -21,8 +21,6 @@ jobs:
     timeout-minutes: 10
 
     steps:
-    - uses: actions/checkout@v2
-
     - name: Intel Apt repository
       timeout-minutes: 1
       run: |
@@ -41,9 +39,11 @@ jobs:
         source /opt/intel/oneapi/setvars.sh
         printenv >> $GITHUB_ENV
 
+    - uses: actions/checkout@v2
+
     - name: Configure multi
       env:
-        CC: icc
+        CC: icx
         FC: ifort
         MPI_ROOT: ${{ env.I_MPI_ROOT }}
       run: cmake --preset multi
