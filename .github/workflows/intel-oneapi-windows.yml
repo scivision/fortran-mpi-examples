@@ -37,7 +37,7 @@ jobs:
 
     - name: Configure
       run: |
-        "C:\Program Files (x86)\Intel\oneAPI\setvars.bat"
+        "%PROGRAMFILES(X86)%"\Intel\oneAPI\setvars.bat
         cmake --preset intel -G "MinGW Makefiles"
 
     - name: build
