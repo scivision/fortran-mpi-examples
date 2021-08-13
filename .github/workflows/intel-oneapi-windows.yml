@@ -23,12 +23,12 @@ jobs:
     timeout-minutes: 10
 
     steps:
+    - uses: actions/checkout@v2
+
     # https://software.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-macos/top/installation/install-using-package-managers.html
     - name: download and install oneAPI
       run: |
-        ./ci/install_windows_oneapi.bat %WINDOWS_HPC_URL% intel.oneapi.win.ifort-compiler:intel.oneapi.win.cpp-compiler:intel.oneapi.win.mpi.devel
-
-    - uses: actions/checkout@v2
+        ./ci/install_windows_oneapi.bat $env:WINDOWS_HPCKIT_URL "intel.oneapi.win.ifort-compiler:intel.oneapi.win.cpp-compiler:intel.oneapi.win.mpi.devel"
 
     - name: Configure
       run: cmake --preset intel
