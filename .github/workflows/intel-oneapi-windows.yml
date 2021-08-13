@@ -5,6 +5,8 @@ env:
   WINDOWS_HPCKIT_URL: https://registrationcenter-download.intel.com/akdlm/irc_nas/17940/w_HPCKit_p_2021.3.0.3227.exe
   CMAKE_BUILD_PARALLEL_LEVEL: 2
   CTEST_PARALLEL_LEVEL: 2
+  CC: icx
+  FC: ifort
 
 on:
   push:
@@ -21,6 +23,9 @@ jobs:
   windows-oneapi:
     runs-on: windows-latest
     timeout-minutes: 10
+    defaults:
+      run:
+        shell: cmd
 
     steps:
     - uses: actions/checkout@v2
@@ -28,10 +33,12 @@ jobs:
     # https://software.intel.com/content/www/us/en/develop/documentation/installation-guide-for-intel-oneapi-toolkits-macos/top/installation/install-using-package-managers.html
     - name: download and install oneAPI
       run: |
-        ./ci/install_windows_oneapi.bat $env:WINDOWS_HPCKIT_URL "intel.oneapi.win.ifort-compiler:intel.oneapi.win.cpp-compiler:intel.oneapi.win.mpi.devel"
+        .\ci\install_windows_oneapi.bat %WINDOWS_HPCKIT_URL% "intel.oneapi.win.ifort-compiler:intel.oneapi.win.cpp-compiler:intel.oneapi.win.mpi.devel"
 
     - name: Configure
-      run: cmake --preset intel
+      run: |
+        "C:\Program Files (x86)\Intel\oneAPI\setvars.bat"
+        cmake --preset intel -G "MinGW Makefiles"
 
     - name: build
       run: cmake --build --preset intel
