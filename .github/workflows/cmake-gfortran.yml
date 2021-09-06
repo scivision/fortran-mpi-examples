@@ -1,4 +1,4 @@
-name: cmake
+name: cmake-gfortran
 
 env:
     CMAKE_BUILD_PARALLEL_LEVEL: 2
@@ -54,7 +54,7 @@ jobs:
     - run: cmake --build --preset default
     - run: ctest --preset default
 
-# MacOS CI MPI tests can hang, so skip. They work find on regular physical Macs.
+# MacOS CI MPI tests can hang, so skip. They work fine on regular physical Macs.
 
   mac-openmpi:
     needs: linux-openmpi

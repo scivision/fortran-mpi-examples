@@ -1,17 +1,12 @@
-name: cmake-intel-oneapi
-
-env:
-  CMAKE_BUILD_PARALLEL_LEVEL: 2
-  CTEST_PARALLEL_LEVEL: 2
+name: meson-intel-oneapi
 
 on:
   push:
     paths:
       - "**.f90"
       - "**.F90"
-      - "**.cmake"
-      - "**/CMakeLists.txt"
-      - ".github/workflows/cmake-intel-oneapi.yml"
+      - "**/meson.build"
+      - ".github/workflows/meson-intel-oneapi.yml"
 
 
 jobs:
@@ -22,6 +17,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    
+    - name: Install meson
+      run: pip install meson ninja
 
     - name: Intel Apt repository
       timeout-minutes: 1
@@ -34,7 +35,7 @@ jobs:
 
     - name: Install Intel oneAPI
       timeout-minutes: 5
-      run: sudo apt-get install intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-mkl ninja-build
+      run: sudo apt-get install intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-mkl
 
     - name: Setup Intel oneAPI environment
       run: |
@@ -46,21 +47,7 @@ jobs:
         CC: icc
         FC: ifort
         MPI_ROOT: ${{ env.I_MPI_ROOT }}
-      run: cmake --preset multi
+      run: meson setup build
 
-    - name: print config log
-      if: ${{ failure() }}
-      run: cat build/CMakeFiles/CMakeError.log
-
-    - name: Debug build
-      run: cmake --build --preset debug
-
-    - name: Debug test
-      run: ctest --preset debug --output-junit test-debug-oneapi.xml
-
-
-    - name: Release build
-      run: cmake --build --preset release
-
-    - name: Release unit test
-      run: ctest --preset release --output-junit test-release-oneapi.xml
+    - run: meson compile -C build
+    - run: meson test -C build -v

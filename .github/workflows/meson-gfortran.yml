@@ -1,0 +1,91 @@
+name: meson-gfortran
+
+on:
+  push:
+    paths:
+      - "**.f90"
+      - "**.F90"
+      - "**.cmake"
+      - "**/meson.build"
+      - ".github/workflows/meson-gfortran.yml"
+
+
+jobs:
+
+  linux-openmpi:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: install prereqs
+      run: |
+        pip install meson ninja
+        sudo apt -yq update
+        sudo apt -yq install --no-install-recommends libopenmpi-dev libcoarrays-dev libcoarrays-openmpi-dev
+        
+    - run: meson setup build
+    - run: meson compile -C build
+    - run: meson test -C build -v
+
+  linux-mpich:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: install prereqs
+      run: |
+        pip install meson ninja
+        sudo apt -yq update
+        sudo apt -yq install --no-install-recommends libmpich-dev
+
+    - run: meson setup build
+    - run: meson compile -C build
+    - run: meson test -C build -v
+
+# MacOS CI MPI tests can hang, so skip. They work fine on regular physical Macs.
+
+  mac-openmpi:
+    needs: linux-openmpi
+    runs-on: macos-latest
+    env:
+      FC: gfortran-11
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: install prereqs
+      run: |
+        pip install meson ninja
+        brew install openmpi
+
+    - run: meson setup build
+    - run: meson compile -C build
+
+  mac-mpich:
+    needs: linux-mpich
+    runs-on: macos-latest
+    env:
+      FC: gfortran-11
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: install prereqs
+      run: |
+        pip install meson ninja
+        brew install mpich
+
+    - run: meson setup build
+    - run: meson compile -C build
