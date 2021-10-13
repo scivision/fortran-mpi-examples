@@ -27,14 +27,9 @@ jobs:
         sudo apt -yq update
         sudo apt -yq install --no-install-recommends libopenmpi-dev libcoarrays-dev libcoarrays-openmpi-dev
 
-    - name: CMake configure
-      run: cmake --preset default
-    - name: configure log
-      if: ${{ failure() }}
-      run: cat build/CMakeFiles/CMakeError.log
-
-    - run: cmake --build --preset default
-    - run: ctest --preset default
+    - run: cmake -Bbuild
+    - run: cmake --build build
+    - run: ctest --test-dir build --preset default
 
   linux-mpich:
     runs-on: ubuntu-latest
@@ -46,14 +41,9 @@ jobs:
         sudo apt -yq update
         sudo apt -yq install --no-install-recommends libmpich-dev
 
-    - name: CMake configure
-      run: cmake --preset default
-    - name: configure log
-      if: ${{ failure() }}
-      run: cat build/CMakeFiles/CMakeError.log
-
-    - run: cmake --build --preset default
-    - run: ctest --preset default
+    - run: cmake -Bbuild
+    - run: cmake --build build
+    - run: ctest --test-dir build --preset default
 
 # MacOS CI MPI tests can hang, so skip. They work find on regular physical Macs.
 
@@ -69,13 +59,8 @@ jobs:
     - name: install prereqs
       run: brew install openmpi
 
-    - name: CMake configure
-      run: cmake --preset default
-    - name: configure log
-      if: ${{ failure() }}
-      run: cat build/CMakeFiles/CMakeError.log
-
-    - run: cmake --build --preset default
+    - run: cmake -Bbuild
+    - run: cmake --build build
 
   mac-mpich:
     needs: linux-mpich
@@ -89,10 +74,5 @@ jobs:
     - name: install prereqs
       run: brew install mpich
 
-    - name: CMake configure
-      run: cmake --preset default
-    - name: configure log
-      if: ${{ failure() }}
-      run: cat build/CMakeFiles/CMakeError.log
-
-    - run: cmake --build --preset default
+    - run: cmake -Bbuild
+    - run: cmake --build build
