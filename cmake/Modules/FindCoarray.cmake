@@ -129,7 +129,9 @@ include(ProcessorCount)
 ProcessorCount(Nproc)
 set(Coarray_MAX_NUMPROCS ${Nproc})
 
-find_package(MPI COMPONENTS Fortran)
+if(NOT MPI_Fortran_FOUND)
+  find_package(MPI COMPONENTS Fortran)
+endif()
 
 if(Coarray_COMPILE_OPTIONS)
   set(CMAKE_REQUIRED_FLAGS ${Coarray_COMPILE_OPTIONS})

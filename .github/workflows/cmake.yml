@@ -1,10 +1,5 @@
 name: cmake
 
-env:
-  CMAKE_BUILD_PARALLEL_LEVEL: 2
-  CTEST_PARALLEL_LEVEL: 2
-  CMAKE_BUILD_TYPE: Release
-
 on:
   push:
     paths:
@@ -17,7 +12,7 @@ on:
 
 jobs:
 
-  linux-openmpi:
+  linux:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -29,26 +24,11 @@ jobs:
 
     - run: cmake -Bbuild
     - run: cmake --build build
-    - run: ctest --test-dir build --preset default
-
-  linux-mpich:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: install prereqs
-      run: |
-        sudo apt -yq update
-        sudo apt -yq install --no-install-recommends libmpich-dev
-
-    - run: cmake -Bbuild
-    - run: cmake --build build
-    - run: ctest --test-dir build --preset default
+    - run: ctest --test-dir build -V
 
 # MacOS CI MPI tests can hang, so skip. They work find on regular physical Macs.
 
-  mac-openmpi:
-    needs: linux-openmpi
+  mac:
     runs-on: macos-latest
     env:
       FC: gfortran-11
@@ -57,22 +37,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: install prereqs
-      run: brew install openmpi
-
-    - run: cmake -Bbuild
-    - run: cmake --build build
-
-  mac-mpich:
-    needs: linux-mpich
-    runs-on: macos-latest
-    env:
-      FC: gfortran-11
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: install prereqs
-      run: brew install mpich
+      run: brew install open-mpi
 
     - run: cmake -Bbuild
     - run: cmake --build build
