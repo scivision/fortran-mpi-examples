@@ -47,15 +47,15 @@ set(opencoarray_supported GNU)
 set(Coarray_LIBRARY)
 
 if(CMAKE_Fortran_COMPILER_ID IN_LIST native)
-
-  set(Coarray_REQUIRED_VARS true)
-
+  # pass
 elseif(CMAKE_Fortran_COMPILER_ID IN_LIST options_coarray)
 
   if(CMAKE_Fortran_COMPILER_ID MATCHES Intel)
     if(WIN32)
       set(Coarray_COMPILE_OPTIONS /Qcoarray:shared)
-    elseif(UNIX AND NOT APPLE)
+    elseif(APPLE)
+      set(Coarray_COMPILE_OPTIONS)
+    else()
       set(Coarray_COMPILE_OPTIONS -coarray=shared)
       set(Coarray_LIBRARY -coarray=shared)  # ifort requires it at build AND link
     endif()
@@ -63,10 +63,10 @@ elseif(CMAKE_Fortran_COMPILER_ID IN_LIST options_coarray)
     set(Coarray_COMPILE_OPTIONS -coarray)
   endif()
 
-  set(Coarray_REQUIRED_VARS ${Coarray_COMPILE_OPTIONS})
+  set(Coarray_REQUIRED_VARS Coarray_COMPILE_OPTIONS)
 
   find_program(Coarray_EXECUTABLE NAMES mpiexec)
-  list(APPEND Coarray_REQUIRED_VARS ${Coarray_EXECUTABLE})
+  list(APPEND Coarray_REQUIRED_VARS Coarray_EXECUTABLE)
 
   set(Coarray_NUMPROC_FLAG -n)
 
@@ -115,41 +115,44 @@ elseif(CMAKE_Fortran_COMPILER_ID IN_LIST opencoarray_supported)
       INTERFACE_COMPILE_OPTIONS ${Coarray_COMPILE_OPTIONS})
   endif()
 
-  set(Coarray_REQUIRED_VARS ${Coarray_LIBRARY})
+  set(Coarray_REQUIRED_VARS Coarray_LIBRARY)
 
   find_program(Coarray_EXECUTABLE NAMES cafrun)
-  list(APPEND Coarray_REQUIRED_VARS ${Coarray_EXECUTABLE})
+  list(APPEND Coarray_REQUIRED_VARS Coarray_EXECUTABLE)
 
   set(Coarray_NUMPROC_FLAG -np)
 
 endif()
 
 
-if(Coarray_REQUIRED_VARS)
-  include(ProcessorCount)
-  ProcessorCount(Nproc)
-  set(Coarray_MAX_NUMPROCS ${Nproc})
+include(ProcessorCount)
+ProcessorCount(Nproc)
+set(Coarray_MAX_NUMPROCS ${Nproc})
 
-  find_package(MPI COMPONENTS Fortran)
+find_package(MPI COMPONENTS Fortran)
 
+if(Coarray_COMPILE_OPTIONS)
   set(CMAKE_REQUIRED_FLAGS ${Coarray_COMPILE_OPTIONS})
-  set(CMAKE_REQUIRED_LIBRARIES ${Coarray_LIBRARY} MPI::MPI_Fortran)
-  include(CheckFortranSourceRuns)
-  # sync all check needed to verify library
-  check_fortran_source_runs("program a
-  real :: x[*]
-  sync all
-  end program"
-  f08coarray)
-  unset(CMAKE_REQUIRED_FLAGS)
-  unset(CMAKE_REQUIRED_LIBRARIES)
 endif()
+set(CMAKE_REQUIRED_LIBRARIES ${Coarray_LIBRARY} MPI::MPI_Fortran)
+include(CheckSourceRuns)
+# sync all check needed to verify library
+check_source_runs(Fortran
+"program a
+real :: x[*]
+sync all
+end program"
+f08coarray
+)
+set(CMAKE_REQUIRED_FLAGS)
+set(CMAKE_REQUIRED_LIBRARIES)
 
-list(APPEND Coarray_REQUIRED_VARS ${f08coarray})
+list(APPEND Coarray_REQUIRED_VARS f08coarray)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Coarray
-  REQUIRED_VARS Coarray_REQUIRED_VARS)
+REQUIRED_VARS ${Coarray_REQUIRED_VARS}
+)
 
 if(Coarray_FOUND)
   set(Coarray_LIBRARIES ${Coarray_LIBRARY})
@@ -165,7 +168,7 @@ if(Coarray_FOUND)
 endif()
 
 mark_as_advanced(
-  Coarray_LIBRARY
-  Coarray_INCLUDE_DIR
-  Coarray_REQUIRED_VARS
+Coarray_LIBRARY
+Coarray_INCLUDE_DIR
+Coarray_REQUIRED_VARS
 )
