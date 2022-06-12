@@ -26,18 +26,18 @@ jobs:
     - run: cmake --build build
     - run: ctest --test-dir build -V
 
-# MacOS CI MPI tests can hang, so skip. They work find on regular physical Macs.
+# MacOS Homebrew Opencoarrays package broken (points to wrong directory)
 
-  mac:
-    runs-on: macos-latest
-    env:
-      FC: gfortran-11
+  # mac:
+  #   runs-on: macos-latest
+  #   env:
+  #     FC: gfortran-11
 
-    steps:
-    - uses: actions/checkout@v2
+  #   steps:
+  #   - uses: actions/checkout@v2
 
-    - name: install prereqs
-      run: brew install open-mpi
+  #   - name: install prereqs
+  #     run: brew install open-mpi
 
-    - run: cmake -Bbuild
-    - run: cmake --build build
+  #   - run: cmake -Bbuild
+  #   - run: cmake --build build
