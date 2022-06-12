@@ -1,0 +1,29 @@
+name: meson
+
+on:
+  push:
+    paths:
+      - "**.f90"
+      - "**/meson.build"
+      - ".github/workflows/meson.yml"
+
+
+jobs:
+
+  linux-openmpi:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: install prereqs
+      run: |
+        pip install meson ninja
+        sudo apt -yq update
+        sudo apt -yq install --no-install-recommends libopenmpi-dev libcoarrays-dev libcoarrays-openmpi-dev
+
+    - run: meson setup build
+    - run: meson compile -C build
+    - run: meson test -C build -v
