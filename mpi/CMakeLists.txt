@@ -2,11 +2,15 @@ set_property(DIRECTORY PROPERTY LABELS mpi)
 
 add_executable(mpi_basic-C basic.c)
 target_link_libraries(mpi_basic-C MPI::MPI_C)
-add_test(NAME mpi_Cbasic COMMAND mpi_basic-C)
+add_test(NAME mpi_Cbasic
+COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:mpi_basic-C>
+)
 
 add_executable(mpi_version-C mpivers.c)
 target_link_libraries(mpi_version-C MPI::MPI_C)
-add_test(NAME mpi_Cversion COMMAND mpi_version-C)
+add_test(NAME mpi_Cversion
+COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:mpi_version-C>
+)
 
 
 if(NOT MPI_Fortran_F08_MODULE_WORKS)
@@ -16,11 +20,15 @@ endif()
 
 add_executable(mpi_basic basic.f90)
 target_link_libraries(mpi_basic MPI::MPI_Fortran)
-add_test(NAME mpi_Fbasic COMMAND mpi_basic)
+add_test(NAME mpi_Fbasic
+COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:mpi_basic>
+)
 
 add_executable(mpi_version mpivers.f90)
 target_link_libraries(mpi_version MPI::MPI_Fortran)
-add_test(NAME mpi_version COMMAND mpi_version)
+add_test(NAME mpi_version
+COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:mpi_version>
+)
 
 # --- more than one MPI image
 
