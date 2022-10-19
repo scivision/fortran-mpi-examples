@@ -40,120 +40,95 @@ The following cache variables may also be set:
   The coarray libraries, if needed and found
 #]=======================================================================]
 
-set(options_coarray Intel IntelLLVM NAG)  # flags needed
-set(native Cray)
-set(opencoarray_supported GNU)
+include(CheckFortranSourceCompiles)
 
-set(Coarray_LIBRARY)
 
-if(CMAKE_Fortran_COMPILER_ID IN_LIST native)
-  # pass
-elseif(CMAKE_Fortran_COMPILER_ID IN_LIST options_coarray)
+function(check_coarray)
 
-  if(CMAKE_Fortran_COMPILER_ID MATCHES Intel)
-    if(WIN32)
-      set(Coarray_COMPILE_OPTIONS /Qcoarray:shared)
-    elseif(APPLE)
-      set(Coarray_COMPILE_OPTIONS)
-    else()
-      set(Coarray_COMPILE_OPTIONS -coarray=shared)
-      set(Coarray_LIBRARY -coarray=shared)  # ifort requires it at build AND link
-    endif()
-  elseif(CMAKE_Fortran_COMPILER_ID STREQUAL NAG)
-    set(Coarray_COMPILE_OPTIONS -coarray)
-  endif()
+set(CMAKE_REQUIRED_FLAGS ${Coarray_COMPILE_OPTIONS})
+set(CMAKE_REQUIRED_LIBRARIES ${Coarray_LIBRARY})
+set(CMAKE_REQUIRED_INCLUDES ${Coarray_INCLUDE_DIR})
 
-  set(Coarray_REQUIRED_VARS Coarray_COMPILE_OPTIONS)
-
-  find_program(Coarray_EXECUTABLE NAMES mpiexec)
-  list(APPEND Coarray_REQUIRED_VARS Coarray_EXECUTABLE)
-
-  set(Coarray_NUMPROC_FLAG -n)
-
-elseif(CMAKE_Fortran_COMPILER_ID IN_LIST opencoarray_supported)
-
-  add_library(Coarray::Coarray INTERFACE IMPORTED)
-
-  if(CMAKE_Fortran_COMPILER_ID STREQUAL GNU)
-    set(Coarray_COMPILE_OPTIONS -fcoarray=lib)
-  endif()
-
-  find_package(OpenCoarrays QUIET)
-  if(OpenCoarrays_FOUND)
-    target_link_libraries(Coarray::Coarray INTERFACE OpenCoarrays::opencoarrays_mod OpenCoarrays::caf_mpi_static)
-    get_target_property(_l OpenCoarrays::caf_mpi_static LOCATION)
-    set(Coarray_LIBRARY ${_l})
-    get_target_property(_l OpenCoarrays::opencoarrays_mod LOCATION)
-    list(APPEND Coarray_LIBRARY ${_l})
-    get_target_property(_l OpenCoarrays::opencoarrays_mod INTERFACE_INCLUDE_DIRECTORIES)
-    set(Coarray_INCLUDE_DIR ${_l})
-  else()
-    find_package(PkgConfig)
-    pkg_search_module(pc_caf caf caf-openmpi caf-mpich)
-
-    find_library(Coarray_LIBRARY
-      NAMES ${pc_caf_LIBRARIES} opencoarrays_mod
-      HINTS ${pc_caf_LIBRARY_DIRS})
-
-    foreach(l caf_mpi caf_openmpi)
-      find_library(Coarray_${l}_LIBRARY
-        NAMES ${l}
-        HINTS ${pc_caf_LIBRARY_DIRS})
-
-      if(Coarray_${l}_LIBRARY)
-        list(APPEND Coarray_LIBRARY ${Coarray_${l}_LIBRARY})
-      endif()
-    endforeach()
-
-    find_path(Coarray_INCLUDE_DIR
-      NAMES opencoarrays.mod
-      HINTS ${pc_caf_INCLUDE_DIRS})
-
-    target_include_directories(Coarray::Coarray INTERFACE ${Coarray_INCLUDE_DIR})
-    target_link_libraries(Coarray::Coarray INTERFACE ${Coarray_LIBRARY})
-    set_target_properties(Coarray::Coarray PROPERTIES
-      INTERFACE_COMPILE_OPTIONS ${Coarray_COMPILE_OPTIONS})
-  endif()
-
-  set(Coarray_REQUIRED_VARS Coarray_LIBRARY)
-
-  find_program(Coarray_EXECUTABLE NAMES cafrun)
-  list(APPEND Coarray_REQUIRED_VARS Coarray_EXECUTABLE)
-
-  set(Coarray_NUMPROC_FLAG -np)
-
+if(MPI_Fortran_FOUND)
+  list(APPEND CMAKE_REQUIRED_LIBRARIES MPI::MPI_Fortran)
 endif()
 
-
-include(ProcessorCount)
-ProcessorCount(Nproc)
-set(Coarray_MAX_NUMPROCS ${Nproc})
-
-if(NOT MPI_Fortran_FOUND)
-  find_package(MPI COMPONENTS Fortran)
-endif()
-
-if(Coarray_COMPILE_OPTIONS)
-  set(CMAKE_REQUIRED_FLAGS ${Coarray_COMPILE_OPTIONS})
-endif()
-set(CMAKE_REQUIRED_LIBRARIES ${Coarray_LIBRARY} MPI::MPI_Fortran)
-include(CheckFortranSourceRuns)
 # sync all check needed to verify library
-check_fortran_source_runs(
+check_fortran_source_compiles(
 "program a
+implicit none
 real :: x[*]
 sync all
 end program"
 f08coarray
+SRC_EXT f90
 )
-set(CMAKE_REQUIRED_FLAGS)
-set(CMAKE_REQUIRED_LIBRARIES)
 
-list(APPEND Coarray_REQUIRED_VARS f08coarray)
+endfunction(check_coarray)
+
+
+if(NOT DEFINED MPI_Fortran_FOUND)
+  find_package(MPI COMPONENTS Fortran)
+endif()
+
+if(CMAKE_Fortran_COMPILER_ID STREQUAL "Cray")
+  check_coarray()
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES "^Intel|NAG")
+
+  if(CMAKE_Fortran_COMPILER_ID MATCHES "^Intel")
+    if(WIN32)
+      set(Coarray_COMPILE_OPTIONS /Qcoarray:shared)
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+      set(Coarray_COMPILE_OPTIONS -coarray=shared)
+      set(Coarray_LIBRARY -coarray=shared)  # ifort requires it at build AND link
+    endif()
+  elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "NAG")
+    set(Coarray_COMPILE_OPTIONS -coarray)
+  endif()
+
+  find_program(Coarray_EXECUTABLE NAMES mpiexec)
+
+  set(Coarray_NUMPROC_FLAG -n)
+  set(Coarray_REQUIRED_VARS Coarray_COMPILE_OPTIONS Coarray_EXECUTABLE)
+
+  check_coarray()
+
+elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+
+  if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+    set(Coarray_COMPILE_OPTIONS -fcoarray=lib)
+  endif()
+
+  find_library(Coarray_LIBRARY
+  NAMES caf_mpi caf_openmpi caf_mpich opencoarrays_mod
+  PATHS /usr/lib/x86_64-linux-gnu/open-coarrays/openmpi/lib
+  )
+
+  find_path(Coarray_INCLUDE_DIR
+  NAMES opencoarrays.mod
+  PATHS /usr/lib/x86_64-linux-gnu/fortran/gfortran-mod-15
+  )
+
+  find_program(Coarray_EXECUTABLE
+  NAMES cafrun
+  PATHS /usr/lib/x86_64-linux-gnu/open-coarrays/openmpi/bin
+  )
+
+  set(Coarray_NUMPROC_FLAG -np)
+  set(Coarray_REQUIRED_VARS Coarray_LIBRARY Coarray_EXECUTABLE)
+
+  if(Coarray_LIBRARY AND Coarray_INCLUDE_DIR AND MPI_Fortran_FOUND)
+    check_coarray()
+  endif()
+
+endif()
+
+
+set(Coarray_MAX_NUMPROCS ${MPIEXEC_MAX_NUMPROCS})
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Coarray
-REQUIRED_VARS ${Coarray_REQUIRED_VARS}
+REQUIRED_VARS ${Coarray_REQUIRED_VARS} f08coarray
 )
 
 if(Coarray_FOUND)
@@ -162,7 +137,10 @@ if(Coarray_FOUND)
 
   if(NOT TARGET Coarray::Coarray)
     add_library(Coarray::Coarray INTERFACE IMPORTED)
-    set_target_properties(Coarray::Coarray PROPERTIES INTERFACE_COMPILE_OPTIONS ${Coarray_COMPILE_OPTIONS})
+    set_property(TARGET Coarray::Coarray PROPERTY INTERFACE_COMPILE_OPTIONS ${Coarray_COMPILE_OPTIONS})
+    if(Coarray_INCLUDE_DIR)
+      target_include_directories(Coarray::Coarray INTERFACE ${Coarray_INCLUDE_DIR})
+    endif()
     if(Coarray_LIBRARY)
       target_link_libraries(Coarray::Coarray INTERFACE ${Coarray_LIBRARY})
     endif()

@@ -3,8 +3,7 @@ mpiexec = find_program('mpiexec', required : false, disabler: true)  # MS-MPI ha
 # -- Fortran coarray
 
 coarray = dependency('coarray', required : false, disabler: true)
-# must be "run" in case of broken MPI library that only shows up on run.
-if not (fc.run('sync all; end', dependencies: coarray, name:'Coarray').returncode() == 0)
+if not fc.links('sync all; end', dependencies: coarray, name:'Coarray')
   coarray = disabler()
 endif
 
