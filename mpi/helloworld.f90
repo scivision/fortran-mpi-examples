@@ -6,7 +6,7 @@ program hw_mpi
 use mpi_f08, only : mpi_init, mpi_comm_size, mpi_comm_world, mpi_wtime, mpi_comm_rank, mpi_finalize
 use, intrinsic:: iso_fortran_env, only: dp=>real64, compiler_version
 
-implicit none (type, external)
+implicit none
 
 integer :: id, Nproc
 real(dp) :: wtime

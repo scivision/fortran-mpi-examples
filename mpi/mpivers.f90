@@ -5,7 +5,7 @@ use, intrinsic :: iso_fortran_env, only : compiler_version
 use mpi_f08, only : MPI_MAX_LIBRARY_VERSION_STRING, mpi_get_library_version, mpi_init, &
   MPI_COMM_SIZE, mpi_comm_world, mpi_finalize, mpi_comm_rank
 
-implicit none (type, external)
+implicit none
 
 integer :: id, Nimg, vlen
 character(MPI_MAX_LIBRARY_VERSION_STRING) :: version  ! allocatable not ok

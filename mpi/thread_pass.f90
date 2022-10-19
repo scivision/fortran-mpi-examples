@@ -8,7 +8,7 @@ use mpi_f08, only : mpi_status, mpi_comm_world, mpi_init, mpi_get_count, &
   mpi_real, mpi_any_source, mpi_any_tag, mpi_source, mpi_tag, mpi_comm_size, &
   mpi_comm_rank, mpi_recv, mpi_send, mpi_finalize
 
-implicit none (type, external)
+implicit none
 
 integer :: mcount
 real(real32) :: dat(0:99), val(200)

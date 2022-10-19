@@ -1,7 +1,6 @@
 project('FortranMPIexamples', 'fortran', 'c',
-  version : files('VERSION'),
-  meson_version: '>= 0.57.0',
-  default_options : ['default_library=static', 'buildtype=release'])
+meson_version: '>= 0.57.0'
+)
 
 
 fc = meson.get_compiler('fortran')

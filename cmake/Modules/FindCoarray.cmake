@@ -137,9 +137,9 @@ if(Coarray_COMPILE_OPTIONS)
   set(CMAKE_REQUIRED_FLAGS ${Coarray_COMPILE_OPTIONS})
 endif()
 set(CMAKE_REQUIRED_LIBRARIES ${Coarray_LIBRARY} MPI::MPI_Fortran)
-include(CheckSourceRuns)
+include(CheckFortranSourceRuns)
 # sync all check needed to verify library
-check_source_runs(Fortran
+check_fortran_source_runs(
 "program a
 real :: x[*]
 sync all

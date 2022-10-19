@@ -2,7 +2,7 @@ program basic
 
 use mpi_f08, only : mpi_init, mpi_finalize
 
-implicit none (type, external)
+implicit none
 
 print *, "going to init MPI"
 
