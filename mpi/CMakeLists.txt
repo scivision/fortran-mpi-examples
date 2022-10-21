@@ -13,7 +13,7 @@ COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:mpi_versio
 )
 
 
-if(NOT MPI_Fortran_F08_MODULE_WORKS)
+if(NOT MPI_Fortran_HAVE_F08_MODULE)
   message(STATUS "SKIP: MPI-3 Fortran tests")
   return()
 endif()

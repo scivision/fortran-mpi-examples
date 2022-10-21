@@ -20,7 +20,7 @@ jobs:
     - name: install prereqs
       run: |
         sudo apt -yq update
-        sudo apt -yq install --no-install-recommends libopenmpi-dev libcoarrays-dev libcoarrays-openmpi-dev
+        sudo apt -yq install --no-install-recommends libopenmpi-dev libcoarrays-dev libcoarrays-openmpi-dev ninja-build
 
     - run: cmake --preset default
     - run: cmake --build --preset default --parallel
