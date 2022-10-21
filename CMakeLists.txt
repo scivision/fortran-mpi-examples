@@ -8,12 +8,11 @@ enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
-find_package(Coarray)
-
 include(cmake/compilers.cmake)
 
 add_subdirectory(mpi)
 
+find_package(Coarray)
 if(Coarray_FOUND)
   add_subdirectory(coarray)
 endif()

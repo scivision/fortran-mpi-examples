@@ -86,7 +86,10 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "^Intel|NAG")
     set(Coarray_COMPILE_OPTIONS -coarray)
   endif()
 
-  find_program(Coarray_EXECUTABLE NAMES mpiexec)
+  find_program(Coarray_EXECUTABLE
+  NAMES mpiexec
+  DOC "Coarray frontend executable"
+  )
 
   set(Coarray_NUMPROC_FLAG -n)
   set(Coarray_REQUIRED_VARS Coarray_COMPILE_OPTIONS Coarray_EXECUTABLE)
@@ -112,6 +115,7 @@ elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
   find_program(Coarray_EXECUTABLE
   NAMES cafrun
   PATHS /usr/lib/x86_64-linux-gnu/open-coarrays/openmpi/bin
+  DOC "Coarray frontend executable"
   )
 
   set(Coarray_NUMPROC_FLAG -np)
