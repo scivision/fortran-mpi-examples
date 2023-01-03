@@ -22,9 +22,9 @@ jobs:
         sudo apt -yq update
         sudo apt -yq install --no-install-recommends libopenmpi-dev libcoarrays-dev libcoarrays-openmpi-dev ninja-build
 
-    - run: cmake --preset default
-    - run: cmake --build --preset default --parallel
-    - run: ctest --preset default
+    - run: cmake --workflow --preset debug
+
+    - run: cmake --workflow --preset release
 
 # MacOS Homebrew Opencoarrays package broken (points to wrong directory)
 

@@ -3,7 +3,7 @@ name: intel-oneapi
 env:
   CC: icc
   FC: ifx
-
+  MPI_ROOT: ${{ env.I_MPI_ROOT }}
 
 on:
   push:
@@ -12,7 +12,7 @@ on:
       - "**.F90"
       - "**.cmake"
       - "**/CMakeLists.txt"
-      - ".github/workflows/intel-oneapi.yml"
+      - ".github/workflows/oneapi-linux.yml"
 
 
 jobs:
@@ -42,24 +42,9 @@ jobs:
         source /opt/intel/oneapi/setvars.sh
         printenv >> $GITHUB_ENV
 
-    - name: Configure multi
-      env:
-        MPI_ROOT: ${{ env.I_MPI_ROOT }}
-      run: cmake --preset multi
+    - name: Debug workflow
+      run: cmake --workflow --preset debug
 
-    - name: print config log
-      if: ${{ failure() }}
-      run: cat build/CMakeFiles/CMakeError.log
+    - name: Release workflow
+      run: cmake --workflow --preset release
 
-    - name: Debug build
-      run: cmake --build --preset debug
-
-    - name: Debug test
-      run: ctest --preset debug
-
-
-    - name: Release build
-      run: cmake --build --preset release
-
-    - name: Release unit test
-      run: ctest --preset release
