@@ -3,7 +3,6 @@ name: intel-oneapi
 env:
   CC: icc
   FC: ifx
-  MPI_ROOT: ${{ env.I_MPI_ROOT }}
 
 on:
   push:
@@ -47,4 +46,3 @@ jobs:
 
     - name: Release workflow
       run: cmake --workflow --preset release
-
