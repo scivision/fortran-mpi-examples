@@ -34,10 +34,7 @@ target_link_libraries(mpi_hello MPI::MPI_Fortran)
 add_test(NAME mpi:hello
 COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} $<TARGET_FILE:mpi_hello>
 )
-set_tests_properties(mpi:hello PROPERTIES
-RESOURCE_LOCK cpu_mpi
-FIXTURES_SETUP mpi_fxt
-)
+set_property(TEST mpi:hello PROPERTY FIXTURES_SETUP mpi_fxt)
 
 # --- actual message passing
 
@@ -49,10 +46,14 @@ if(MPIEXEC_MAX_NUMPROCS GREATER_EQUAL 2)
 add_test(NAME mpi:pass
 COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 2 $<TARGET_FILE:mpi_pass>
 )
+set_property(TEST mpi:pass PROPERTY FIXTURES_REQUIRED mpi_fxt)
 
-set_tests_properties(mpi:pass PROPERTIES
-RESOURCE_LOCK cpu_mpi
-FIXTURES_REQUIRED mpi_fxt
-)
+endif()
 
+
+get_property(tests DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY TESTS)
+set_property(TEST ${tests} PROPERTY cpu_mpi)
+
+if(DEFINED mpi_tmpdir)
+  set_property(TEST ${tests} PROPERTY ENVIRONMENT TMPDIR=${mpi_tmpdir})
 endif()

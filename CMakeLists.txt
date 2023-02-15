@@ -12,6 +12,25 @@ include(cmake/compilers.cmake)
 
 add_subdirectory(mpi)
 
+# *** OpenMPI workaround
+if(UNIX)
+  if(NOT DEFINED mpi_tmpdir)
+    execute_process(COMMAND mktemp -d /tmp/mpi-XXXXXXXX
+    RESULT_VARIABLE ret
+    OUTPUT_VARIABLE mpi_tmpdir
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if(NOT ret EQUAL 0)
+      message(FATAL_ERROR "could not create MPI working dir via mktemp -d: ${ret}")
+    endif()
+    set(mpi_tmpdir ${mpi_tmpdir} CACHE PATH "MPI working dir")
+    message(STATUS "${ret}: Created MPI working dir ${mpi_tmpdir}")
+  endif()
+endif()
+# *** END OpenMPI workaround
+
+# --- Coarrary
+
 find_package(Coarray)
 if(Coarray_FOUND)
   add_subdirectory(coarray)
