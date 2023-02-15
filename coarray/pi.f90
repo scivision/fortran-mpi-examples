@@ -10,7 +10,7 @@ real, parameter :: pi = 4*atan(1.)
 real :: psum[*]  ! this is a scalar coarray
 integer(int64) :: rate,tic,toc
 real :: f,x,telaps, dx
-integer :: i, stat, im, Ni, ierr
+integer :: i, stat, im, Ni
 character(16) :: cbuf
 
 psum = 0
@@ -51,7 +51,7 @@ endif
 if (im == 1) then
   call system_clock(toc)
   call system_clock(count_rate=rate)
-  telaps = real(toc - tic)  / rate
+  telaps = real((toc - tic)  / rate)
   print '(A,E10.3,A,I3,A)', 'Elapsed wall clock time ', telaps, ' seconds, using',num_images(),' images.'
 end if
 

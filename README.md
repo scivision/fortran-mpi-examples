@@ -18,6 +18,8 @@ Build and self-test:
 cmake --workflow --preset default
 ```
 
+This repo also gives an example of a workaround for OpenMPI 4.x and mpiexec race condition with large CPU count by setting TMPDIR to a short path name so as not to exceed 100 characters for UNIX sockets.
+
 ## Message Passing
 
 Pass data between two MPI threads.
