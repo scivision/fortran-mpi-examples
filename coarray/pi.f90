@@ -51,7 +51,7 @@ endif
 if (im == 1) then
   call system_clock(toc)
   call system_clock(count_rate=rate)
-  telaps = real((toc - tic)  / rate)
+  telaps = real(toc - tic)  / real(rate)
   print '(A,E10.3,A,I3,A)', 'Elapsed wall clock time ', telaps, ' seconds, using',num_images(),' images.'
 end if
 
