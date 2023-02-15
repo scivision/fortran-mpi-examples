@@ -18,3 +18,12 @@ end program
 MPI_Fortran_HAVE_F08_MODULE
 SRC_EXT f90
 )
+
+if(NOT MPI_Fortran_HAVE_F08_MODULE)
+  message(FATAL_ERROR "Fortran MPI-3 binding not present.")
+endif()
+
+
+if(NOT MSVC)
+  add_compile_options(-Wall)
+endif()

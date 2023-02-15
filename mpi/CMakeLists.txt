@@ -12,10 +12,7 @@ add_test(NAME mpi_Cversion
 COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} 1 $<TARGET_FILE:mpi_version-C>
 )
 
-
-if(NOT MPI_Fortran_HAVE_F08_MODULE)
-  return()
-endif()
+# --- Fortran MPI-3
 
 add_executable(mpi_basic basic.f90)
 target_link_libraries(mpi_basic MPI::MPI_Fortran)

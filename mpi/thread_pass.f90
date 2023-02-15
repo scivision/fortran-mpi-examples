@@ -67,7 +67,7 @@ call MPI_Finalize()
 if (id == 0) then
   call system_clock(toc)
   call system_clock(count_rate=rate)
-  print *, 'Run time in seconds: ',real(toc - tic)  / rate
+  print *, 'Run time in seconds: ', real( (toc - tic) / rate)
 end if
 
 end program

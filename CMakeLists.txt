@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14...3.25)
+cmake_minimum_required(VERSION 3.14...3.26)
 
 project(FortranMPIexamples
 LANGUAGES C Fortran
@@ -20,6 +20,5 @@ endif()
 include(FeatureSummary)
 
 add_feature_info(Coarray Coarray_FOUND "Coarray Fortran")
-add_feature_info(MPIF08 MPI_Fortran_HAVE_F08_MODULE "MPI Fortran 2008 bindings")
 
 feature_summary(WHAT ALL)

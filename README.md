@@ -6,11 +6,11 @@
 A few very basic examples, perhaps use to test Coarray and MPI library functionality.
 GCC/Gfortran, Intel oneAPI, NAG, Cray, IBM XL and other compilers support Fortran 2008 Coarrays.
 
-Free, popular MPI 3.0 interfaces for C and Fortran include:
+Free, popular MPI-3 interfaces for C and Fortran include:
 
 * [OpenMPI](https://www.open-mpi.org/) (Linux, Mac)
 * [MPICH](https://www.mpich.org/) (Linux, Mac)
-* [Intel MPI](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/mpi-library.html#gs.01cdz4) (Linux, Windows)
+* [Intel MPI](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/mpi-library.html) (Linux, Windows)
 
 Build and self-test:
 
