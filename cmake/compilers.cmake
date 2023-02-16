@@ -1,6 +1,10 @@
 include(CheckFortranSourceCompiles)
 
+set(MPI_DETERMINE_LIBRARY_VERSION true)
 find_package(MPI REQUIRED COMPONENTS C Fortran)
+message(STATUS "MPI Library Version: ${MPI_C_LIBRARY_VERSION_STRING}")
+
+include(${CMAKE_CURRENT_LIST_DIR}/openmpi.cmake)
 
 set(CMAKE_REQUIRED_INCLUDES ${MPI_Fortran_INCLUDE_DIRS})
 set(CMAKE_REQUIRED_LIBRARIES ${MPI_Fortran_LIBRARIES})
