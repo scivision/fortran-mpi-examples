@@ -1,7 +1,7 @@
 # Fortran MPI Examples
 
-[![cmake](https://github.com/scivision/fortran-coarray-mpi-examples/actions/workflows/cmake.yml/badge.svg)](https://github.com/scivision/fortran-coarray-mpi-examples/actions/workflows/cmake.yml)
-[![oneapi-linux](https://github.com/scivision/fortran-coarray-mpi-examples/actions/workflows/oneapi-linux.yml/badge.svg)](https://github.com/scivision/fortran-coarray-mpi-examples/actions/workflows/oneapi-linux.yml)
+[![cmake](https://github.com/scivision/fortran-mpi-examples/actions/workflows/cmake.yml/badge.svg)](https://github.com/scivision/fortran-mpi-examples/actions/workflows/cmake.yml)
+[![oneapi-linux](https://github.com/scivision/fortran-mpi-examples/actions/workflows/oneapi-linux.yml/badge.svg)](https://github.com/scivision/fortran-mpi-examples/actions/workflows/oneapi-linux.yml)
 
 A few very basic examples, perhaps use to test MPI-3 Fortran library functionality.
 
