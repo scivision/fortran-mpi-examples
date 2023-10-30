@@ -15,29 +15,18 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    - name: install prereqs
+    - name: install prereqs (linux)
+      if: runner.os == 'Linux'
       run: |
         sudo apt -yq update
-        sudo apt -yq install --no-install-recommends libopenmpi-dev libcoarrays-dev libcoarrays-openmpi-dev ninja-build
+        sudo apt -yq install --no-install-recommends libopenmpi-dev ninja-build
+
+    - name: install prereqs (mac)
+      if: runner.os == 'macOS'
+      run: brew install open-mpi
 
     - run: cmake --workflow --preset debug
 
     - run: cmake --workflow --preset release
-
-# MacOS Homebrew Opencoarrays package broken (points to wrong directory)
-
-  # mac:
-  #   runs-on: macos-latest
-  #   env:
-  #     FC: gfortran-11
-
-  #   steps:
-  #   - uses: actions/checkout@v3
-
-  #   - name: install prereqs
-  #     run: brew install open-mpi
-
-  #   - run: cmake -Bbuild
-  #   - run: cmake --build build

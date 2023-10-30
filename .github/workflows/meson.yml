@@ -13,7 +13,7 @@ jobs:
   linux-openmpi:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/setup-python@v4
       with:
         python-version: '3.x'
@@ -22,7 +22,7 @@ jobs:
       run: |
         pip install meson ninja
         sudo apt -yq update
-        sudo apt -yq install --no-install-recommends libopenmpi-dev libcoarrays-dev libcoarrays-openmpi-dev
+        sudo apt -yq install --no-install-recommends libopenmpi-dev
 
     - run: meson setup build
     - run: meson compile -C build
