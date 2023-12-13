@@ -14,18 +14,21 @@ jobs:
 
   linux:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        mpi: [openmpi, mpich]
+
     steps:
     - uses: actions/checkout@v4
 
     - name: install prereqs (linux)
       if: runner.os == 'Linux'
-      run: |
-        sudo apt -yq update
-        sudo apt -yq install --no-install-recommends libopenmpi-dev ninja-build
+      run: sudo apt -yq install --no-install-recommends lib${{ matrix.mpi }}-dev ninja-build
 
     - name: install prereqs (mac)
       if: runner.os == 'macOS'
-      run: brew install open-mpi
+      run: brew install ${{ matrix.mpi }} ninja
 
     - run: cmake --workflow --preset debug
 
