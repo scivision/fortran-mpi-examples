@@ -17,6 +17,16 @@ Build and self-test:
 cmake --workflow --preset default
 ```
 
+or step-by-step
+
+```sh
+cmake -Bbuild
+
+cmake --build build
+
+ctest --test-dir build -V
+```
+
 This repo also gives an example of a workaround for OpenMPI 4.x and mpiexec race condition with large CPU count by setting TMPDIR to a short path name so as not to exceed 100 characters for UNIX sockets.
 
 ## Message Passing
@@ -25,7 +35,7 @@ Pass data between two MPI threads.
 In this usage, MPI_Recv blocks waiting for MPI_Send
 
 ```sh
-mpirun -np 2 mpi/mpi_pass
+mpiexec -np 2 mpi/mpi_pass
 ```
 
 ## Notes
