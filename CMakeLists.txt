@@ -8,6 +8,6 @@ enable_testing()
 
 include(cmake/compilers.cmake)
 
-add_subdirectory(src)
+add_subdirectory(test)
 
 file(GENERATE OUTPUT .gitignore CONTENT "*")
