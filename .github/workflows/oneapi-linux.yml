@@ -7,6 +7,8 @@ env:
   LINUX_MPI_COMPONENTS: "intel-oneapi-mpi intel-oneapi-mpi-devel"
 # https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml
   CTEST_NO_TESTS_ACTION: error
+  CC: icx
+  FC: ifx
 
 on:
   push:
@@ -43,15 +45,21 @@ jobs:
       timeout-minutes: 10
       run: |
         sh -c .github/workflows/oneapi_setup_apt_repo_linux.sh
-        sudo apt install ${{ env.LINUX_CPP_COMPONENTS }} ${{ env.LINUX_FORTRAN_COMPONENTS }} ${{ env.LINUX_MPI_COMPONENTS }}
+        sudo apt install --no-install-recommends ${{ env.LINUX_CPP_COMPONENTS }} ${{ env.LINUX_FORTRAN_COMPONENTS }} ${{ env.LINUX_MPI_COMPONENTS }}
 
     - name: Setup Intel oneAPI environment
       run: |
         source /opt/intel/oneapi/setvars.sh
         printenv >> $GITHUB_ENV
 
+    - name: patch PATH (this should be done by setvar.sh)
+      run: echo "/opt/intel/oneapi/compiler/latest/bin" >> $GITHUB_PATH
+
     - name: print env
       run: printenv
+
+    - name: ls compiler dir
+      run: ls /opt/intel/oneapi/compiler/
 
     - name: install Ninja
       run: sudo apt install ninja-build
