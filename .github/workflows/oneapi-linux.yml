@@ -7,8 +7,6 @@ env:
   LINUX_MPI_COMPONENTS: "intel-oneapi-mpi intel-oneapi-mpi-devel"
 # https://github.com/oneapi-src/oneapi-ci/blob/master/.github/workflows/build_all.yml
   CTEST_NO_TESTS_ACTION: error
-  CC: icx
-  FC: ifx
 
 on:
   push:
@@ -26,44 +24,23 @@ on:
 jobs:
 
   linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 10
 
     steps:
-    - uses: actions/checkout@v4
-
-    - name: cache install oneAPI
-      id: cache-install
-      uses: actions/cache@v3
+    - uses: fortran-lang/setup-fortran@v1
+      id: setup-fortran
       with:
-        path: |
-          /opt/intel/oneapi
-        key: install-apt
+        compiler: intel
+        version: '2023.2'
 
-    - name: non-cache install oneAPI
-      if: steps.cache-install.outputs.cache-hit != 'true'
-      timeout-minutes: 10
-      run: |
-        sh -c .github/workflows/oneapi_setup_apt_repo_linux.sh
-        sudo apt install --no-install-recommends ${{ env.LINUX_CPP_COMPONENTS }} ${{ env.LINUX_FORTRAN_COMPONENTS }} ${{ env.LINUX_MPI_COMPONENTS }}
-
-    - name: Setup Intel oneAPI environment
-      run: |
-        source /opt/intel/oneapi/setvars.sh
-        printenv >> $GITHUB_ENV
-
-    - name: patch PATH (this should be done by setvar.sh)
-      run: echo "/opt/intel/oneapi/compiler/latest/bin" >> $GITHUB_PATH
-
-    - name: print env
-      run: printenv
-
-    - name: ls compiler dir
-      run: ls /opt/intel/oneapi/compiler/
+    - name: install oneMPI
+      run: sudo apt install --no-install-recommends ${{ env.LINUX_MPI_COMPONENTS }}
 
     - name: install Ninja
       run: sudo apt install ninja-build
-# install ninja needs to be own step as not cached by design
+
+    - uses: actions/checkout@v4
 
     - name: Release workflow
       run: cmake --workflow --preset debug
