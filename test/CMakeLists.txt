@@ -35,9 +35,13 @@ set_property(TEST mpi_pass PROPERTY FIXTURES_REQUIRED mpi_fxt)
 
 endif()
 
+# --- test properties
 
 get_property(tests DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY TESTS)
+
 set_property(TEST ${tests} PROPERTY cpu_mpi)
+
+set_property(TEST ${tests} PROPERTY SKIP_REGULAR_EXPRESSION "No host list provided")
 
 # convenience vars
 set(single mpi_basic_C mpi_version_C mpi_basic_Fortran mpi_version_Fortran)
