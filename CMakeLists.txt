@@ -8,6 +8,9 @@ enable_testing()
 
 message(STATUS "CMake ${CMAKE_VERSION} Generator ${CMAKE_GENERATOR}")
 
+# this has checks that can be reused in other projects as well
+include(cmake/mpi.cmake)
+
 include(cmake/compilers.cmake)
 
 add_subdirectory(test)
