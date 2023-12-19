@@ -6,6 +6,8 @@ LANGUAGES C Fortran
 
 enable_testing()
 
+message(STATUS "CMake ${CMAKE_VERSION} Generator ${CMAKE_GENERATOR}")
+
 include(cmake/compilers.cmake)
 
 add_subdirectory(test)
