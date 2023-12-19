@@ -43,3 +43,12 @@ See
 re: setting PATH and LD_LIBRARY_PATH if CMake has trouble finding OpenMPI for a compiler.
 
 * https://hpc-forge.cineca.it/files/CoursesDev/public/2017/MasterCS/CalcoloParallelo/MPI_Master2017.pdf
+
+### MPI-3 Fortran
+
+If "mpi_f08.mod" is not found, typically the MPI include directories are also missing.
+You can manually check if mpi_f08.mod is preset under the include "-I" directories from:
+
+```sh
+mpif90 -show
+```
