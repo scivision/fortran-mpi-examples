@@ -10,8 +10,12 @@ HINTS ${MPI_Fortran_INCLUDE_DIRS}
 )
 
 message(STATUS "${MPI_Fortran_LIBRARY_VERSION_STRING}")
-message(STATUS "MPI libs: ${MPI_Fortran_LIBRARIES}")
-message(STATUS "MPI include: ${MPI_Fortran_INCLUDE_DIRS}")
+
+message(STATUS "MPI_Fortran_LIBRARIES: ${MPI_Fortran_LIBRARIES}")
+
+message(STATUS "MPI_Fortran_MODULE_DIR: ${MPI_Fortran_MODULE_DIR}")
+message(STATUS "MPI_Fortran_INCLUDE_DIRS: ${MPI_Fortran_INCLUDE_DIRS}")
+
 message(STATUS "MPI_f08 module: ${mpi_f08_mod}")
 message(STATUS "MPI compile flags: ${MPI_Fortran_COMPILER_FLAGS}")
 message(STATUS "MPI link flags: ${MPI_Fortran_LINK_FLAGS}")
