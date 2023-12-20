@@ -1,7 +1,9 @@
 include(CheckSourceCompiles)
 
 set(MPI_DETERMINE_LIBRARY_VERSION true)
+
 find_package(MPI REQUIRED COMPONENTS C Fortran)
+
 message(STATUS "MPI Library Version: ${MPI_C_LIBRARY_VERSION_STRING}")
 
 # Cray FindMPI.cmake has a bug where the plain CMake variables aren't defined, only imported target is
