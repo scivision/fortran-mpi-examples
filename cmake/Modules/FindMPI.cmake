@@ -5,7 +5,7 @@
 FindMPI
 -------
 
-by Michael Hirsch www.scivision.dev
+SciVision www.scivision.dev
 
 Finds compiler flags or library necessary to use MPI library (MPICH, OpenMPI, MS-MPI, Intel MPI, ...)
 
@@ -29,12 +29,6 @@ Result Variables
 
 ``MPI_FOUND``
   indicates MPI library found
-
-``MPI_LIBRARIES``
-  MPI library path
-
-``MPI_INCLUDE_DIRS``
-  MPI include path
 
 ``MPI_<LANG>_LIBRARIES``
   libraries for <LANG>
@@ -257,6 +251,7 @@ list(APPEND MPI_C_LIBRARY ${MPI_C_LIBRARY_fullpath})
 find_path(MPI_C_INCLUDE_DIR
   NAMES mpi.h
   HINTS ${inc_dirs} ${mpi_root} ${pc_mpi_c_INCLUDE_DIRS} ${_hints} ${_hints_inc}
+  DOC "MPI C include directory"
 )
 if(NOT (MPI_C_LIBRARY AND MPI_C_INCLUDE_DIR))
   return()
@@ -397,6 +392,7 @@ foreach(n ${mpi_libname})
     NAMES ${n}
     HINTS ${mpi_libdirs} ${mpi_root} ${pc_mpi_cxx_LIBRARY_DIRS} ${pc_mpi_cxx_LIBDIR} ${_hints}
     PATH_SUFFIXES ${mpi_libsuf}
+    DOC "MPI C++ library"
   )
   if(MPI_CXX_${n}_LIBRARY)
     list(APPEND MPI_CXX_LIBRARY ${MPI_CXX_${n}_LIBRARY})
@@ -406,6 +402,7 @@ endforeach()
 find_path(MPI_CXX_INCLUDE_DIR
   NAMES mpi.h
   HINTS ${inc_dirs} ${mpi_root} ${pc_mpi_cxx_INCLUDE_DIRS} ${_hints} ${_hints_inc}
+  DOC "MPI C++ include directory"
 )
 if(NOT (MPI_CXX_LIBRARY AND MPI_CXX_INCLUDE_DIR))
   return()
@@ -521,6 +518,7 @@ if(WIN32 AND NOT CMAKE_Fortran_COMPILER_ID MATCHES "^Intel")
     NAMES mpifptr.h
     HINTS ${inc_dirs} ${mpi_root} ${pc_mpi_f_INCLUDE_DIRS} ${_hints} ${_hints_inc}
     PATH_SUFFIXES x64
+    DOC "MPI Fortran include directory"
   )
 
   if(MPI_Fortran_INCLUDE_EXTRA AND NOT MPI_Fortran_INCLUDE_EXTRA STREQUAL ${MPI_Fortran_INCLUDE_DIR})
@@ -684,9 +682,6 @@ if(MPI_Fortran_FOUND)
 endif(MPI_Fortran_FOUND)
 
 if(MPI_FOUND)
-  set(MPI_LIBRARIES ${MPI_Fortran_LIBRARIES} ${MPI_C_LIBRARIES})
-  set(MPI_INCLUDE_DIRS ${MPI_Fortran_INCLUDE_DIRS} ${MPI_C_INCLUDE_DIRS})
-
   set(MPIEXEC_NUMPROC_FLAG "-n"  CACHE STRING "Flag used by MPI to specify the number of processes for mpiexec; the next option will be the number of processes.")
   cmake_host_system_information(RESULT _n QUERY NUMBER_OF_PHYSICAL_CORES)
   set(MPIEXEC_MAX_NUMPROCS "${_n}" CACHE STRING "Maximum number of processors available to run MPI applications.")
