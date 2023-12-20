@@ -8,7 +8,7 @@ enable_testing()
 
 message(STATUS "CMake ${CMAKE_VERSION} Generator ${CMAKE_GENERATOR}  Build type ${CMAKE_BUILD_TYPE}")
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
+# list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
 # this has checks that can be reused in other projects as well
 include(cmake/mpi.cmake)
