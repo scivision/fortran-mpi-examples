@@ -19,7 +19,12 @@ include(${CMAKE_CURRENT_LIST_DIR}/openmpi.cmake)
 
 set(CMAKE_REQUIRED_LIBRARIES MPI::MPI_Fortran)
 
+if(MPI_Fortran_HAVE_F08_MODULE)
+  return()
+endif()
+
 # sometimes factory FindMPI.cmake doesn't define this
+message(CHECK_START "Checking for Fortran MPI-3 binding")
 check_source_compiles(Fortran
 [=[
 program test
@@ -32,6 +37,9 @@ end program
 MPI_Fortran_HAVE_F08_MODULE
 )
 
-if(NOT MPI_Fortran_HAVE_F08_MODULE)
-  message(FATAL_ERROR "Fortran MPI-3 binding not present.")
+if(MPI_Fortran_HAVE_F08_MODULE)
+  message(CHECK_PASS "yes")
+else()
+  message(CHECK_FAIL "no")
+  message(WARNING "MPI-3 Fortran module mpi_f08 not found, builds may fail.")
 endif()
