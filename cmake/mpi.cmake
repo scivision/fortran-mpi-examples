@@ -17,11 +17,12 @@ message(STATUS "MPI_Fortran_LINK_FLAGS: ${MPI_Fortran_LINK_FLAGS}")
 
 include(${CMAKE_CURRENT_LIST_DIR}/openmpi.cmake)
 
-set(CMAKE_REQUIRED_LIBRARIES MPI::MPI_Fortran)
 
 if(MPI_Fortran_HAVE_F08_MODULE)
   return()
 endif()
+
+set(CMAKE_REQUIRED_LIBRARIES MPI::MPI_Fortran)
 
 # sometimes factory FindMPI.cmake doesn't define this
 message(CHECK_START "Checking for Fortran MPI-3 binding")
