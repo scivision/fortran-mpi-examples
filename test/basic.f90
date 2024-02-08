@@ -1,8 +1,8 @@
 program basic
 
-use mpi_f08, only : mpi_init, mpi_finalize
+use mpi_f08
 
-implicit none
+implicit none (type, external)
 
 print *, "going to init MPI"
 

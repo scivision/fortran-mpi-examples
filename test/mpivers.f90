@@ -2,8 +2,8 @@ program mpi_vers
 ! https://github.com/open-mpi/ompi/blob/master/examples/hello_usempif08.f90
 
 use, intrinsic :: iso_fortran_env, only : compiler_version
-use mpi_f08, only : MPI_MAX_LIBRARY_VERSION_STRING, mpi_get_library_version, mpi_init, &
-  MPI_COMM_SIZE, mpi_comm_world, mpi_finalize, mpi_comm_rank
+
+use mpi_f08
 
 implicit none
 

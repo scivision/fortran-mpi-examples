@@ -3,10 +3,10 @@ program mpi_pass
 !! This would be much simpler using Fortran 2008 coarray syntax
 !!
 !!  Original author:  John Burkardt
+
 use, intrinsic :: iso_fortran_env, only: real32, compiler_version, int64
-use mpi_f08, only : mpi_status, mpi_comm_world, mpi_init, mpi_get_count, &
-  mpi_real, mpi_any_source, mpi_any_tag, mpi_source, mpi_tag, mpi_comm_size, &
-  mpi_comm_rank, mpi_recv, mpi_send, mpi_finalize
+
+use mpi_f08
 
 implicit none
 
@@ -46,7 +46,7 @@ case (0)
 
   print *, id, ' Got ', mcount, ' elements.'
 
-  if (val(5) /= 4) error stop "data did not transfer"
+  if (abs(val(5)-4) > epsilon(0.)) error stop "data did not transfer"
 
 !  Process 1 sends 100 real values to process 0.
 case (1)
