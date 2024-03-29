@@ -17,7 +17,6 @@ message(STATUS "MPI_Fortran_LINK_FLAGS: ${MPI_Fortran_LINK_FLAGS}")
 
 include(${CMAKE_CURRENT_LIST_DIR}/openmpi.cmake)
 
-
 if(MPI_Fortran_HAVE_F08_MODULE)
   return()
 endif()

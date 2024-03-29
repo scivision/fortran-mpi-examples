@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19...3.28)
+cmake_minimum_required(VERSION 3.19...3.29)
 
 project(FortranMPIexamples
 LANGUAGES C Fortran
@@ -12,6 +12,7 @@ message(STATUS "CMake ${CMAKE_VERSION} Generator ${CMAKE_GENERATOR}  Build type 
 
 # this has checks that can be reused in other projects as well
 include(cmake/mpi.cmake)
+include(cmake/mpi_launcher.cmake)
 
 include(cmake/print_target_props.cmake)
 print_target_props(MPI::MPI_Fortran)
