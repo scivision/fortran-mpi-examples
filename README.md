@@ -1,6 +1,8 @@
 # Fortran MPI Examples
 
-[![cmake](https://github.com/scivision/fortran-mpi-examples/actions/workflows/cmake.yml/badge.svg)](https://github.com/scivision/fortran-mpi-examples/actions/workflows/cmake.yml)
+[![cmake](https://github.com/scivision/fortran-mpi-examples/actions/workflows/unix-cmake.yml/badge.svg)](https://github.com/scivision/fortran-mpi-examples/actions/workflows/unix-cmake.yml)
+[![cmake](https://github.com/scivision/fortran-mpi-examples/actions/workflows/windows-cmake.yml/badge.svg)](https://github.com/scivision/fortran-mpi-examples/actions/workflows/windows-cmake.yml)
+
 A few very basic examples, perhaps use to test MPI-3 Fortran library functionality.
 
 Free, popular MPI-3 interfaces for C and Fortran include:
