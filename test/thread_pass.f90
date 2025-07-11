@@ -6,7 +6,7 @@ program mpi_pass
 
 use, intrinsic :: iso_fortran_env, only: compiler_version, int64, stderr=>error_unit
 
-use mpi_f08
+use mpi
 
 implicit none
 
@@ -15,7 +15,8 @@ real :: dat(0:99), val(200)
 integer :: dest, i, num_procs, id, tag
 integer(int64) :: tic, toc, rate
 
-type(MPI_STATUS) :: status
+! type(MPI_STATUS) :: status
+integer :: status(MPI_STATUS_SIZE)
 
 call system_clock(tic)
 
@@ -43,11 +44,13 @@ endif
 select case (id)
 case (0)
   print *, id, "waiting for MPI_send() from image 1"
-  call MPI_Recv (val, size(val), MPI_REAL, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, status)
+  call MPI_Recv (val, size(val), MPI_REAL, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, status, ierr)
+  if (ierr /= MPI_SUCCESS) error stop "MPI_Recv failed"
 
-  print '(i0,a,i0,a,i0)', id, ' Got data from processor ', status%MPI_SOURCE, ' tag ',status%MPI_TAG
+  ! print '(i0,a,i0,a,i0)', id, ' Got data from processor ', status%MPI_SOURCE, ' tag ',status%MPI_TAG
 
-  call MPI_Get_count(status, MPI_REAL, mcount)
+  call MPI_Get_count(status, MPI_REAL, mcount, ierr)
+  if (ierr /= MPI_SUCCESS) error stop "MPI_Get_count failed"
 
   print '(i0,a,i0,a)', id, ' Got ', mcount, ' elements.'
 
@@ -61,7 +64,9 @@ case (1)
 
   dest = 0
   tag = 55
-  call MPI_Send(dat, size(dat), MPI_REAL, dest, tag, MPI_COMM_WORLD)
+  call MPI_Send(dat, size(dat), MPI_REAL, dest, tag, MPI_COMM_WORLD, ierr)
+  if(ierr /= MPI_SUCCESS) error stop "MPI_Send failed"
+
 case default
   print '(i0,a,i0)', id, ': MPI has no work for image', id
 end select

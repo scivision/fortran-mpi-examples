@@ -31,8 +31,6 @@ set_property(TEST MPIhello PROPERTY FIXTURES_SETUP mpi_fxt)
 
 # --- actual message passing
 
-if(MPI_Fortran_VERSION VERSION_GREATER 3.0)
-
 add_executable(mpi_pass thread_pass.f90)
 target_link_libraries(mpi_pass PRIVATE MPI::MPI_Fortran)
 
@@ -44,9 +42,6 @@ LABELS "Fortran"
 DISABLED $<VERSION_LESS:${MPIEXEC_MAX_NUMPROCS},2>
 FIXTURES_REQUIRED mpi_fxt
 )
-
-
-endif()
 
 # --- test properties
 
