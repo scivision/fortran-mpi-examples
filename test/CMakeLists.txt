@@ -38,11 +38,11 @@ target_link_libraries(mpi_pass PRIVATE MPI::MPI_Fortran)
 
 add_test(NAME MPIpass COMMAND mpi_pass)
 test_mpi_launcher(mpi_pass MPIpass 2)
-set_property(TEST MPIpass PROPERTY FIXTURES_REQUIRED mpi_fxt)
 
 set_tests_properties(MPIpass PROPERTIES
 LABELS "Fortran"
 DISABLED $<VERSION_LESS:${MPIEXEC_MAX_NUMPROCS},2>
+FIXTURES_REQUIRED mpi_fxt
 )
 
 
