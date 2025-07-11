@@ -26,7 +26,7 @@ jobs:
 
     - name: install prereqs (linux)
       if: runner.os == 'Linux'
-      run: sudo apt -yq install --no-install-recommends lib${{ matrix.mpi }}-dev
+      run: sudo apt install --no-install-recommends lib${{ matrix.mpi }}-dev
 
     - name: install prereqs (mac)
       if: runner.os == 'macOS'
@@ -61,9 +61,8 @@ jobs:
     - name: Install mpiexec.exe (-force needed to bypass GUI on headless)
       run: .\msmpisetup.exe -unattend -force
 
-    - name: test that mpiexec.exe exists
-      # can't use MSMPI_BIN as Actions doesn't update PATH from msmpisetup.exe
-      run: Test-Path "C:\Program Files\Microsoft MPI\Bin\mpiexec.exe" -PathType leaf
+    - name: Assert file existence
+      run: if (-not (Test-Path -Path "C:\Program Files\Microsoft MPI\Bin\mpiexec.exe" -PathType Leaf)) { exit 1 }
 
     - name: put MSMPI_BIN on PATH (where mpiexec is)
       run: echo "C:\Program Files\Microsoft MPI\Bin\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
