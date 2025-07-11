@@ -19,7 +19,9 @@ jobs:
 
     strategy:
       matrix:
-        mpi: [openmpi, mpich]
+        mpi: [openmpi]
+# For some reason, mpich GitHub Actions MPIEXEC only
+# uses one CPU for MPICH
 
     steps:
     - uses: actions/checkout@v4
@@ -38,7 +40,7 @@ jobs:
 
 
   windows:
-    runs-on: windows-2025
+    runs-on: windows-latest
     name: CMake build on Windows
     timeout-minutes: 15
 
@@ -50,16 +52,14 @@ jobs:
         install: >-
           mingw-w64-ucrt-x86_64-gcc
           mingw-w64-ucrt-x86_64-gcc-fortran
-          mingw-w64-ucrt-x86_64-msmpi
 
     - name: Put MSYS2_MinGW64 on PATH
       run: echo "${{ steps.msys2.outputs.msys2-location }}/ucrt64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-    - name: download MS-MPI setup (SDK is from MSYS2)
-      run: curl -L -O https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1/msmpisetup.exe
-
-    - name: Install mpiexec.exe (-force needed to bypass GUI on headless)
-      run: .\msmpisetup.exe -unattend -force -verbose
+    - name: Setup Microsoft MPI
+      uses: mpi4py/setup-mpi@v1
+      with:
+        mpi: msmpi
 
     - uses: actions/checkout@v4
 
