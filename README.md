@@ -14,7 +14,7 @@ Free, popular MPI-3 interfaces for C and Fortran include:
 Build and self-test:
 
 ```sh
-cmake --workflow --preset default
+cmake --workflow default
 ```
 
 or step-by-step

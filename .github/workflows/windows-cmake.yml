@@ -37,6 +37,6 @@ jobs:
 
     - uses: actions/checkout@v4
 
-    - run: cmake --workflow --preset debug
+    - run: cmake --workflow debug
 
-    - run: cmake --workflow --preset release
+    - run: cmake --workflow release

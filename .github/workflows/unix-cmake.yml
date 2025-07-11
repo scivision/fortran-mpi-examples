@@ -34,6 +34,6 @@ jobs:
       if: runner.os == 'macOS'
       run: brew install ${{ matrix.mpi }}
 
-    - run: cmake --workflow --preset debug
+    - run: cmake --workflow debug
 
-    - run: cmake --workflow --preset release
+    - run: cmake --workflow release
