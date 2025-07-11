@@ -13,6 +13,8 @@ on:
 jobs:
 
   linux:
+    name: CMake build on Linux
+    timeout-minutes: 15
     runs-on: ubuntu-latest
 
     strategy:
@@ -24,11 +26,49 @@ jobs:
 
     - name: install prereqs (linux)
       if: runner.os == 'Linux'
-      run: sudo apt -yq install --no-install-recommends lib${{ matrix.mpi }}-dev ninja-build
+      run: sudo apt -yq install --no-install-recommends lib${{ matrix.mpi }}-dev
 
     - name: install prereqs (mac)
       if: runner.os == 'macOS'
-      run: brew install ${{ matrix.mpi }} ninja
+      run: brew install ${{ matrix.mpi }}
+
+    - run: cmake --workflow --preset debug
+
+    - run: cmake --workflow --preset release
+
+
+  windows:
+    runs-on: windows-2025
+    name: CMake build on Windows
+    timeout-minutes: 15
+
+    steps:
+    - uses: msys2/setup-msys2@v2
+      id: msys2
+      with:
+        update: true
+        install: >-
+          mingw-w64-ucrt-x86_64-gcc
+          mingw-w64-ucrt-x86_64-gcc-fortran
+          mingw-w64-ucrt-x86_64-msmpi
+
+    - name: Put MSYS2_MinGW64 on PATH
+      run: echo "${{ steps.msys2.outputs.msys2-location }}/ucrt64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+    - name: download MS-MPI setup (SDK is from MSYS2)
+      run: curl -L -O https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1/msmpisetup.exe
+
+    - name: Install mpiexec.exe (-force needed to bypass GUI on headless)
+      run: .\msmpisetup.exe -unattend -force
+
+    - name: test that mpiexec.exe exists
+      # can't use MSMPI_BIN as Actions doesn't update PATH from msmpisetup.exe
+      run: Test-Path "C:\Program Files\Microsoft MPI\Bin\mpiexec.exe" -PathType leaf
+
+    - name: put MSMPI_BIN on PATH (where mpiexec is)
+      run: echo "C:\Program Files\Microsoft MPI\Bin\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+    - uses: actions/checkout@v4
 
     - run: cmake --workflow --preset debug
 

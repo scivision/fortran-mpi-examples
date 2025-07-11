@@ -14,15 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: '3.x'
 
     - name: install prereqs
       run: |
-        pip install meson ninja
-        sudo apt -yq update
-        sudo apt -yq install --no-install-recommends libopenmpi-dev
+        pip install meson
+        sudo apt update
+        sudo apt install --no-install-recommends libopenmpi-dev
 
     - run: meson setup build
     - run: meson compile -C build

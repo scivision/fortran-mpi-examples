@@ -1,17 +1,28 @@
 program basic
 
-use mpi_f08
+use mpi
+use, intrinsic :: iso_fortran_env, only: stderr=>error_unit, compiler_version
 
 implicit none (type, external)
 
-print *, "going to init MPI"
+integer :: ierr
 
-call MPI_INIT()
+print '(a)', "going to init MPI"
 
-print *, "MPI Init OK"
+call MPI_INIT(ierr)
+if (ierr /= MPI_SUCCESS) then
+  write(stderr,'(a,i0)') "MPI_INIT failed with error code", ierr
+  error stop
+endif
 
-call MPI_FINALIZE()
+print '(a)', "MPI Init OK"
 
-print *, "MPI closed"
+call MPI_FINALIZE(ierr)
+if (ierr /= MPI_SUCCESS) then
+  write(stderr,'(a,i0)') "MPI_FINALIZE failed with error code", ierr
+  error stop
+endif
+
+print '(a)', "MPI closed"
 
 end program

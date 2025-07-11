@@ -3,23 +3,26 @@ program hw_mpi
 !!  Original Author:  John Burkardt
 !!  Modified: Michael Hirsch, Ph.D.
 
-use, intrinsic:: iso_fortran_env, only: dp=>real64, compiler_version
+use, intrinsic:: iso_fortran_env, only: dp=>real64, compiler_version, stderr=>error_unit
 
-use mpi_f08
+use mpi
 
 implicit none
 
-integer :: id, Nproc
+integer :: id, Nproc, ierr
 real(dp) :: wtime
 
 !>  Initialize MPI.
-call MPI_Init()
+call MPI_Init(ierr)
+if (ierr /= MPI_SUCCESS) error stop "MPI_INIT failed"
 
 !>  Get the number of processes.
-call MPI_Comm_size(MPI_COMM_WORLD, Nproc)
+call MPI_Comm_size(MPI_COMM_WORLD, Nproc, ierr)
+if (ierr /= MPI_SUCCESS) error stop "MPI_Comm_size failed"
 
 !>  Get the individual process ID.
-call MPI_Comm_rank(MPI_COMM_WORLD, id)
+call MPI_Comm_rank(MPI_COMM_WORLD, id, ierr)
+if (ierr /= MPI_SUCCESS) error stop "MPI_Comm_rank failed"
 
 !>  Print a message.
 if (id == 0) then
@@ -28,14 +31,16 @@ if (id == 0) then
   print *, 'number of processes: ', Nproc
 end if
 
-print *, 'Process ', id
+print '(a,i0)', 'Process ', id
 
 if (id == 0) then
   wtime = MPI_Wtime() - wtime
-  print *, 'Elapsed wall clock time = ', wtime, ' seconds.'
+
+  print '(a,f0.3,a)', 'Elapsed wall clock time = ', wtime, ' seconds.'
 end if
 
 !>  Shut down MPI.
-call MPI_Finalize()
+call MPI_Finalize(ierr)
+if (ierr /= MPI_SUCCESS) error stop "MPI_FINALIZE failed"
 
 end program
