@@ -86,10 +86,6 @@ jobs:
     - name: build
       run: cmake --build --preset default
 
-    - name: build failed
-      if: ${{ failure() }}
-      run: cmake --build --preset default -j1 -v
-
     - name: unit test
       run: ctest --preset default -V
 
