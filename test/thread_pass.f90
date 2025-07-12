@@ -10,6 +10,8 @@ use mpi
 
 implicit none
 
+integer :: mpipasstype
+
 integer :: mcount, ierr
 real :: dat(0:99), val(200)
 integer :: dest, i, num_procs, id, tag
@@ -17,6 +19,16 @@ integer(int64) :: tic, toc, rate
 
 ! type(MPI_STATUS) :: status
 integer :: status(MPI_STATUS_SIZE)
+
+
+if (storage_size(dat) == 32) then
+  mpipasstype = MPI_REAL
+else if (storage_size(dat) == 64) then
+  mpipasstype = MPI_DOUBLE_PRECISION
+else
+  error stop "Unsupported data type size"
+endif
+
 
 call system_clock(tic)
 
@@ -44,12 +56,12 @@ endif
 select case (id)
 case (0)
   print *, id, "waiting for MPI_send() from image 1"
-  call MPI_Recv (val, size(val), MPI_REAL, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, status, ierr)
+  call MPI_Recv (val, size(val), mpipasstype, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, status, ierr)
   if (ierr /= MPI_SUCCESS) error stop "MPI_Recv failed"
 
   ! print '(i0,a,i0,a,i0)', id, ' Got data from processor ', status%MPI_SOURCE, ' tag ',status%MPI_TAG
 
-  call MPI_Get_count(status, MPI_REAL, mcount, ierr)
+  call MPI_Get_count(status, mpipasstype, mcount, ierr)
   if (ierr /= MPI_SUCCESS) error stop "MPI_Get_count failed"
 
   print '(i0,a,i0,a)', id, ' Got ', mcount, ' elements.'
@@ -64,7 +76,7 @@ case (1)
 
   dest = 0
   tag = 55
-  call MPI_Send(dat, size(dat), MPI_REAL, dest, tag, MPI_COMM_WORLD, ierr)
+  call MPI_Send(dat, size(dat), mpipasstype, dest, tag, MPI_COMM_WORLD, ierr)
   if(ierr /= MPI_SUCCESS) error stop "MPI_Send failed"
 
 case default

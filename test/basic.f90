@@ -3,7 +3,7 @@ program basic
 use mpi
 use, intrinsic :: iso_fortran_env, only: stderr=>error_unit, compiler_version
 
-implicit none (type, external)
+implicit none
 
 integer :: ierr
 
