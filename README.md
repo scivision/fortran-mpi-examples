@@ -11,6 +11,10 @@ Free, popular MPI-3 interfaces for C and Fortran include:
 * [MPICH](https://www.mpich.org/) (Linux, Mac)
 * [Intel MPI](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/mpi-library.html) (Linux, Windows)
 
+[Fortran Coarrays](https://github.com/scivision/fortran-coarray-examples)
+are in a separate repo.
+
+
 Build and self-test:
 
 ```sh
