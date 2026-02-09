@@ -49,12 +49,12 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     # this must be before oneAPI script commands else the scripts do not exist on the image
 
     - name: cache install oneAPI
       id: cache-install
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           /opt/intel/oneapi

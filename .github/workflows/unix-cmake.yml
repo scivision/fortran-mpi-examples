@@ -20,11 +20,10 @@ jobs:
     strategy:
       matrix:
         mpi: [openmpi]
-# For some reason, mpich GitHub Actions MPIEXEC only
-# uses one CPU for MPICH
+# For some reason, mpich GitHub Actions MPIEXEC only uses one CPU for MPICH
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: install prereqs (linux)
       if: runner.os == 'Linux'
