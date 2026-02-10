@@ -2,6 +2,14 @@ include(CheckSourceCompiles)
 
 set(MPI_DETERMINE_LIBRARY_VERSION true)
 
+if(DEFINED ENV{CONDA_PREFIX})
+  list(APPEND CMAKE_IGNORE_PREFIX_PATH $ENV{CONDA_PREFIX})
+  list(APPEND CMAKE_IGNORE_PATH $ENV{CONDA_PREFIX}/bin)
+  # need CMAKE_IGNORE_PATH for CMake < 3.23
+  # and to ensure system env var PATH doesn't interfere
+  # despite CMAKE_IGNORE_PREFIX_PATH
+endif()
+
 find_package(MPI REQUIRED COMPONENTS C Fortran)
 
 message(STATUS "MPI Library Version: ${MPI_C_LIBRARY_VERSION_STRING}")
