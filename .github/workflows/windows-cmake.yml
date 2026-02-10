@@ -35,8 +35,47 @@ jobs:
       with:
         mpi: msmpi
 
-    - uses: actions/checkout@v6
+    - &checkout
+      uses: actions/checkout@v6
 
     - run: cmake --workflow debug
 
     - run: cmake --workflow release
+
+
+  wsl:
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        shell: wsl-bash {0}
+
+    steps:
+
+    - uses: Vampire/setup-wsl@v6
+      with:
+        distribution: Ubuntu-24.04
+        additional-packages:
+          cmake ninja-build gcc g++ gfortran libopenmpi-dev
+        use-cache: true
+
+    - name: tell OS release
+      run: cat /etc/os-release
+
+    - name: tell WSL version
+      run: wsl.exe -l -v
+      shell: pwsh
+
+    - *checkout
+
+    - name: CMake Configure
+      run: cmake -Bbuild -G Ninja
+
+    - name: CMake Build
+      run: cmake --build build
+
+    - name: CMake Test
+      run: ctest --test-dir build -V
+
+# seems there's not yet an Vampire/setup-wsl@v6 option to set environment variables
