@@ -5,30 +5,27 @@ program hw_mpi
 
 use, intrinsic:: iso_fortran_env, only: dp=>real64, compiler_version, stderr=>error_unit
 
-use mpi
+use mpi_f08
 
 implicit none
 
-integer :: id, Nproc, ierr
+integer :: id, Nproc
 real(dp) :: wtime
 
 !>  Initialize MPI.
-call MPI_Init(ierr)
-if (ierr /= MPI_SUCCESS) error stop "MPI_INIT failed"
+call MPI_Init()
 
 !>  Get the number of processes.
-call MPI_Comm_size(MPI_COMM_WORLD, Nproc, ierr)
-if (ierr /= MPI_SUCCESS) error stop "MPI_Comm_size failed"
+call MPI_Comm_size(MPI_COMM_WORLD, Nproc)
 
 !>  Get the individual process ID.
-call MPI_Comm_rank(MPI_COMM_WORLD, id, ierr)
-if (ierr /= MPI_SUCCESS) error stop "MPI_Comm_rank failed"
+call MPI_Comm_rank(MPI_COMM_WORLD, id)
 
 !>  Print a message.
 if (id == 0) then
-  print *,compiler_version()
+  print '(a)',compiler_version()
   wtime = MPI_Wtime()
-  print *, 'number of processes: ', Nproc
+  print '(a,i0)', 'number of processes: ', Nproc
 end if
 
 print '(a,i0)', 'Process ', id
@@ -40,7 +37,6 @@ if (id == 0) then
 end if
 
 !>  Shut down MPI.
-call MPI_Finalize(ierr)
-if (ierr /= MPI_SUCCESS) error stop "MPI_FINALIZE failed"
+call MPI_Finalize()
 
 end program

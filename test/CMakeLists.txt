@@ -8,12 +8,16 @@ target_link_libraries(mpi_version_C PRIVATE MPI::MPI_C)
 add_test(NAME MPIversionC COMMAND mpi_version_C)
 test_mpi_launcher(mpi_version_C MPIversionC 1)
 
-# --- Fortran MPI-3
+set_tests_properties(MPIbasicC MPIversionC PROPERTIES LABELS "C")
+
+# --- Fortran
 
 add_executable(mpi_basic_Fortran basic.f90)
 target_link_libraries(mpi_basic_Fortran PRIVATE MPI::MPI_Fortran)
 add_test(NAME MPIbasicFortran COMMAND mpi_basic_Fortran)
 test_mpi_launcher(mpi_basic_Fortran MPIbasicFortran 1)
+
+if(MPI_Fortran_VERSION VERSION_GREATER_EQUAL 3.0)
 
 add_executable(mpi_version_Fortran mpivers.f90)
 target_link_libraries(mpi_version_Fortran PRIVATE MPI::MPI_Fortran)
@@ -43,6 +47,11 @@ DISABLED $<VERSION_LESS:${MPIEXEC_MAX_NUMPROCS},2>
 FIXTURES_REQUIRED mpi_fxt
 )
 
+set_tests_properties(MPIbasicFortran MPIversionFortran MPIhello
+PROPERTIES LABELS "Fortran")
+
+endif()
+
 # --- test properties
 
 get_property(tests DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY TESTS)
@@ -51,7 +60,3 @@ set_tests_properties(${tests} PROPERTIES
 RESOURCE_LOCK mpi
 SKIP_REGULAR_EXPRESSION "No host list provided"
 )
-
-set_tests_properties(MPIbasicC MPIversionC PROPERTIES LABELS "C")
-set_tests_properties(MPIbasicFortran MPIversionFortran MPIhello
-PROPERTIES LABELS "Fortran")

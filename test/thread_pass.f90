@@ -6,19 +6,19 @@ program mpi_pass
 
 use, intrinsic :: iso_fortran_env, only: compiler_version, int64, stderr=>error_unit
 
-use mpi
+use mpi_f08
 
 implicit none
 
-integer :: mpipasstype
+type(MPI_DATATYPE) :: mpipasstype
 
-integer :: mcount, ierr
+integer :: mcount
 real :: dat(0:99), val(200)
 integer :: dest, i, num_procs, id, tag
 integer(int64) :: tic, toc, rate
 
-! type(MPI_STATUS) :: status
-integer :: status(MPI_STATUS_SIZE)
+type(MPI_STATUS) :: status
+!integer :: status(MPI_STATUS_SIZE)
 
 
 if (storage_size(dat) == 32) then
@@ -32,16 +32,13 @@ endif
 
 call system_clock(tic)
 
-call MPI_Init(ierr)
-if (ierr /= MPI_SUCCESS) error stop "MPI_INIT failed"
+call MPI_Init()
 
 !  Determine this process's ID.
-call MPI_Comm_rank(MPI_COMM_WORLD, id, ierr)
-if (ierr /= MPI_SUCCESS) error stop "MPI_Comm_rank failed"
+call MPI_Comm_rank(MPI_COMM_WORLD, id)
 
 !  Find out the number of processes available.
-call MPI_Comm_size(MPI_COMM_WORLD, num_procs, ierr)
-if (ierr /= MPI_SUCCESS) error stop "MPI_Comm_size failed"
+call MPI_Comm_size(MPI_COMM_WORLD, num_procs)
 
 if (id == 0) print '(a)',compiler_version()
 
@@ -56,13 +53,11 @@ endif
 select case (id)
 case (0)
   print *, id, "waiting for MPI_send() from image 1"
-  call MPI_Recv (val, size(val), mpipasstype, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, status, ierr)
-  if (ierr /= MPI_SUCCESS) error stop "MPI_Recv failed"
+  call MPI_Recv (val, size(val), mpipasstype, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, status)
 
   ! print '(i0,a,i0,a,i0)', id, ' Got data from processor ', status%MPI_SOURCE, ' tag ',status%MPI_TAG
 
-  call MPI_Get_count(status, mpipasstype, mcount, ierr)
-  if (ierr /= MPI_SUCCESS) error stop "MPI_Get_count failed"
+  call MPI_Get_count(status, mpipasstype, mcount)
 
   print '(i0,a,i0,a)', id, ' Got ', mcount, ' elements.'
 
@@ -76,15 +71,13 @@ case (1)
 
   dest = 0
   tag = 55
-  call MPI_Send(dat, size(dat), mpipasstype, dest, tag, MPI_COMM_WORLD, ierr)
-  if(ierr /= MPI_SUCCESS) error stop "MPI_Send failed"
+  call MPI_Send(dat, size(dat), mpipasstype, dest, tag, MPI_COMM_WORLD)
 
 case default
   print '(i0,a,i0)', id, ': MPI has no work for image', id
 end select
 
-call MPI_Finalize(ierr)
-if (ierr /= MPI_SUCCESS) error stop "MPI_Finalize failed"
+call MPI_Finalize()
 
 if (id == 0) then
   call system_clock(toc)
