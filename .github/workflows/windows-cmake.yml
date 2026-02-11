@@ -59,6 +59,7 @@ jobs:
         additional-packages:
           cmake ninja-build gcc g++ gfortran libopenmpi-dev
         use-cache: true
+        wsl-shell-user: tester
 
     - name: tell OS release
       run: cat /etc/os-release
@@ -69,13 +70,15 @@ jobs:
 
     - *checkout
 
+# -B /tmp/build to have write perms in WSL
+
     - name: CMake Configure
-      run: cmake -Bbuild -G Ninja
+      run: cmake -B/tmp/build -G Ninja
 
     - name: CMake Build
-      run: cmake --build build
+      run: cmake --build /tmp/build
 
     - name: CMake Test
-      run: ctest --test-dir build -V
+      run: ctest --test-dir /tmp/build -V
 
 # seems there's not yet an Vampire/setup-wsl@v6 option to set environment variables
