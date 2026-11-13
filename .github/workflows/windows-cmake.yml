@@ -9,6 +9,9 @@ on:
       - "**/CMakeLists.txt"
       - ".github/workflows/windows-cmake.yml"
 
+env:
+  CMAKE_BUILD_TYPE: RelWithDebInfo
+
 
 jobs:
 
@@ -36,11 +39,9 @@ jobs:
         mpi: msmpi
 
     - &checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
-    - run: cmake --workflow debug
-
-    - run: cmake --workflow release
+    - run: cmake --workflow default
 
 
   wsl:
@@ -53,9 +54,9 @@ jobs:
 
     steps:
 
-    - uses: Vampire/setup-wsl@v6
+    - uses: Vampire/setup-wsl@v7
       with:
-        distribution: Ubuntu-24.04
+        distribution: Ubuntu-26.04
         additional-packages:
           cmake ninja-build gcc g++ gfortran libopenmpi-dev
         use-cache: true
